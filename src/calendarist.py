@@ -197,7 +197,10 @@ def merge_calendar_data(target_list, **data_sources):
         },
         "easter_data_list": {
             "key_type": "ymd",
-            "mapping": {"holiday_name": "holiday_name"},
+            "mapping": {
+                "holiday_name": "holiday_name",
+                "is_easter": "is_easter"
+            },
         },
         "fixed_holidays_list": {
             "key_type": "md",  # Short key
@@ -373,6 +376,7 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
             "month": easter_day["month"],
             "day": easter_day["day"],
             "holiday_name": t("holidays")[0],
+            "is_easter": True
         },
         {
             "year": easter_day["year"],
