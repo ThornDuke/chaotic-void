@@ -203,7 +203,13 @@ def merge_calendar_data(target_list, **data_sources):
             "key_type": "md",  # Short key
             "mapping": {"holiday_name": "holiday_name"},
         },
-        "seasons_list": {"key_type": "ymd", "mapping": {"translated_season": "season"}},
+        "seasons_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "translated_season": "season",
+                "event_ord": "season_type"
+            }
+        },
     }
 
     # Add planets to configuration (generic logic: copy everything found)
