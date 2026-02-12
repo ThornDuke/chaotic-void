@@ -10,10 +10,54 @@ import datetime
 from zoneinfo import ZoneInfo
 from skyfield import almanac, eclipselib
 from skyfield.api import load, wgs84
+from skyfield.framelib import ecliptic_frame
+from skyfield.searchlib import find_maxima
 import ephem
 from .data.localization import translator
 
 JPL_EPHEMERIS_FILE = "de440s.bsp"
+
+
+def max_elongation(body: str, year: int):
+    l_body = body.lower()
+    if l_body not in ['venus', 'mercury']:
+        raise ValueError('The maximum elongation can only be calculated for Mercury and Venus')
+    
+    ts = load.timescale()
+    t0 = ts.utc(year - 1)
+    t1 = ts.utc(year + 1)
+
+    eph = load('de421.bsp')
+    sun, earth, curr_body = eph['sun'], eph['earth'], eph[l_body]
+
+    def elongation_at(t):
+        e = earth.at(t)
+        s = e.observe(sun).apparent()
+        cb = e.observe(curr_body).apparent()
+        return s.separation_from(cb).degrees
+
+    elongation_at.step_days = 15.0
+
+    times, elongations = find_maxima(t0, t1, elongation_at)
+
+    result = []
+
+    for t, elongation_degrees in zip(times, elongations):
+        e = earth.at(t)
+        _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
+        _, vlon, _ = e.observe(curr_body).apparent().frame_latlon(ecliptic_frame)
+        is_east = (vlon.degrees - slon.degrees) % 360.0 < 180.0
+        direction = 'east' if is_east else 'west'
+        result.append({
+            "year": t.utc.year,
+            "month": t.utc.month,
+            "day": t.utc.day,
+            f"{l_body}_elong_time": datetime.time(t.utc.hour, t.utc.minute, int(t.utc.second)),
+            f"{l_body}_elong_degrees": elongation_degrees,
+            f"{l_body}_elong_direction": direction
+        })
+    
+    return result
 
 
 def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:

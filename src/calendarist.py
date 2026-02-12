@@ -183,6 +183,8 @@ def merge_calendar_data(target_list, **data_sources):
         "mars_data_list",
         "jupiter_data_list",
         "saturn_data_list",
+        "venus_max_elongation_data_list",
+        "mercury_max_elongation_data_list"
     ]
 
     config = {
@@ -213,6 +215,22 @@ def merge_calendar_data(target_list, **data_sources):
                 "event_ord": "season_type"
             }
         },
+        "venus_max_elongation_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "venus_elong_time": "venus_elong_time",
+                "venus_elong_degrees": "venus_elong_degrees",
+                "venus_elong_direction": "venus_elong_direction"
+            }
+        },
+        "mercury_max_elongation_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "mercury_elong_time": "mercury_elong_time",
+                "mercury_elong_degrees": "mercury_elong_degrees",
+                "mercury_elong_direction": "mercury_elong_direction"
+            }
+        }
     }
 
     # Add planets to configuration (generic logic: copy everything found)
@@ -351,7 +369,7 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     t = translator(language)
 
     # Generate core date structures
-    scribus.progressTotal(10)
+    scribus.progressTotal(11)
     scribus.progressReset()
     notify(1, "cal_structure_creation")
     base_dates = generate_dates(year)
@@ -405,6 +423,10 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     fixed_holidays = get_holidays_list(year, language)
     seasons = translated_seasons(astronomer.get_seasons(year), language)
 
+    notify(10, "cal_max_elongation")
+    venus_max_elongation_data = astronomer.max_elongation('venus', year)
+    mercury_max_elongation_data = astronomer.max_elongation('mercury', year)
+
     # Consolidate all data into final list
     full_calendar = merge_calendar_data(
         translated_dates,
@@ -420,6 +442,8 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
         mars_data_list=mars_data,
         jupiter_data_list=jupiter_data,
         saturn_data_list=saturn_data,
+        venus_max_elongation_data_list = venus_max_elongation_data,
+        mercury_max_elongation_data_list = mercury_max_elongation_data
     )
 
     #--temp
