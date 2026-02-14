@@ -8,6 +8,7 @@ holidays (Easter) using the 'astral' and 'pyephem' libraries.
 
 import datetime
 from zoneinfo import ZoneInfo
+from collections import namedtuple
 from skyfield import almanac, eclipselib
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame
@@ -18,17 +19,80 @@ from .data.localization import translator
 JPL_EPHEMERIS_FILE = "de440s.bsp"
 
 
-def max_elongation(body: str, year: int):
+def bsp_alias(planet_name, data):
+    PlanetResult = namedtuple('PlanetResult', ['name', 'code'])
+    
+    search_name = planet_name.upper()
+    barycenter_name = f"{search_name}_BARYCENTER"
+    
+    clean_match = None
+    barycenter_match = None
+
+    names = data.names()
+
+    for code, aliases in names.items():
+        if search_name in aliases:
+            clean_match = PlanetResult(name=search_name, code=code)
+            break 
+        if barycenter_name in aliases:
+            barycenter_match = PlanetResult(name=barycenter_name, code=code)
+
+    if clean_match:
+        return clean_match
+    if barycenter_match:
+        return barycenter_match
+    
+    raise ValueError(f"[bsp_alias]: The planet '{planet_name}' is not present in the provided dictionary.")
+
+
+def opposition_conjunction(body, year, language):    
+    t = translator(language)
+    timezone = ZoneInfo(t("timezone"))
+
+    l_body = body.lower()
+    if l_body not in ['mars', 'jupiter', 'saturn']:
+        raise ValueError('[opposition_conjunction]: Oppositions and conjunctions can only be calculated for Mars, Jupiter and Saturn')
+    
+    ts = load.timescale()
+    planets = load(JPL_EPHEMERIS_FILE)
+    planet_sign = bsp_alias(body, planets)
+    
+    t0 = ts.utc(year - 1, 1, 1)
+    t1 = ts.utc(year + 1, 12, 31)
+    f = almanac.oppositions_conjunctions(planets, planets[planet_sign.name])
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    result = []
+    for ti, yi in zip(t, y):
+        tz_time = ti.astimezone(timezone)
+        oc = int(f"{yi}")
+        result.append({
+            'year': int(f"{ti.utc.year}"),
+            'month': int(f"{ti.utc.month}"),
+            'day': int(f"{ti.utc.day}"),
+            f"{body}_oc_time": tz_time,
+            f"{body}_oc": oc,
+            f"{body}_oc_description": 'conjuction' if oc == 0 else 'opposition'
+        })
+    
+    return result
+
+
+def max_elongation(body, year, language):
     l_body = body.lower()
     if l_body not in ['venus', 'mercury']:
-        raise ValueError('The maximum elongation can only be calculated for Mercury and Venus')
+        raise ValueError('[max_elongation]: The maximum elongation can only be calculated for Mercury and Venus')
     
+    t = translator(language)
+    timezone = ZoneInfo(t("timezone"))
+
     ts = load.timescale()
     t0 = ts.utc(year - 1)
     t1 = ts.utc(year + 1)
 
-    eph = load('de421.bsp')
-    sun, earth, curr_body = eph['sun'], eph['earth'], eph[l_body]
+    eph = load(JPL_EPHEMERIS_FILE)
+    object = bsp_alias(body, eph)
+    sun, earth, curr_body = eph['sun'], eph['earth'], eph[object.name]
 
     def elongation_at(t):
         e = earth.at(t)
@@ -48,11 +112,12 @@ def max_elongation(body: str, year: int):
         _, vlon, _ = e.observe(curr_body).apparent().frame_latlon(ecliptic_frame)
         is_east = (vlon.degrees - slon.degrees) % 360.0 < 180.0
         direction = 'east' if is_east else 'west'
+        tz_t = t.astimezone(timezone)
         result.append({
             "year": t.utc.year,
             "month": t.utc.month,
             "day": t.utc.day,
-            f"{l_body}_elong_time": datetime.time(t.utc.hour, t.utc.minute, int(t.utc.second)),
+            f"{l_body}_elong_time": tz_t,
             f"{l_body}_elong_degrees": elongation_degrees,
             f"{l_body}_elong_direction": direction
         })
@@ -84,7 +149,8 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
 
     ts = load.timescale()
     eph = load(JPL_EPHEMERIS_FILE)
-    target = eph[object]
+    bsp_object = bsp_alias(object, eph)
+    target = eph[bsp_object.name]
     bluffton = wgs84.latlon(latitude, longitude)
     observer = eph["Earth"] + bluffton
 
@@ -101,7 +167,7 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
         t0 = ts.utc(date.year, date.month, date.day, 0)
         t1 = ts.utc(date.year, date.month, date.day, 23, 59, 59)
 
-        object_rise_times, are_rise_visibles = almanac.find_risings(
+        object_rise_times, _ = almanac.find_risings(
             observer, target, t0, t1
         )
         object_transit_times = almanac.find_transits(observer, target, t0, t1)
@@ -209,7 +275,7 @@ def get_easter_day(year):
       ValueError: If the year is before the introduction of the Gregorian calendar.
     """
     if year < 1583:
-        raise ValueError("The year must be >= 1583 (Gregorian Calendar).")
+        raise ValueError("[get_easter_day]: The year must be >= 1583 (Gregorian Calendar).")
 
     # Meeus/Jones/Butcher Algorithm
     a = year % 19
@@ -260,7 +326,7 @@ def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
     eph = load(JPL_EPHEMERIS_FILE)
     t0 = ts.utc(year - 1, 12, 1)
     t1 = ts.utc(year + 1, 1, 31)
-    t, y, details = eclipselib.lunar_eclipses(t0, t1, eph)
+    t, y, _ = eclipselib.lunar_eclipses(t0, t1, eph)
 
     results = []
     for ti, yi in zip(t, y):

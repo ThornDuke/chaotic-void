@@ -36,7 +36,7 @@ def template_replace(template, **replacements):
         key = match.group(1).strip()
         if key not in replacements:
             raise KeyError(
-                f"Placeholder '{{{{{key}}}}}' not found in provided arguments."
+                f"[template_replace]: Placeholder '{{{{{key}}}}}' not found in provided arguments."
             )
         return str(replacements[key])
 

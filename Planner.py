@@ -98,9 +98,9 @@ def main() -> None:
         return
     
     try:
-        process_start: datetime.datetime = datetime.datetime.now().replace(microsecond=0)                
-        year: int = edition["year"]
-        language: str = edition["language"]
+        process_start = datetime.datetime.now().replace(microsecond=0)                
+        year = edition["year"]
+        language = edition["language"]
         # Generazione dati e creazione layout
         calendar_data = calendarist.generate_full_calendar(year, language)
         designer.create_planner_A5(calendar_data, language)
