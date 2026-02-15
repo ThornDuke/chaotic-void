@@ -13,7 +13,7 @@ import re
 import scribus  # pyright: ignore[reportMissingImports]
 from .data.lines import get_A5_line_data
 from .data.localization import translator, by_acronym
-from .utilities import template_replace, round_dt_to_min, generate_filename
+from .utilities import template_replace, round_dt_to_min, generate_filename, save_to_file
 #--temp
 from src.archivist import Logger
 #--remove before release--/
@@ -353,8 +353,81 @@ def get_main_year(data):
     return first_day["year"] if first_day else None
 
 
-def drawFirstPage(year, language):
-    """Creates a centered cover page title with the planner year an a legend with the symbols used."""
+def extract_planetary_events(input_data):
+    # Struttura di base del risultato
+    result = {
+        "easter": "",
+        "seasons": [],
+        "mercury": [],
+        "venus": [],
+        "moon": [],
+        "mars": [],
+        "jupiter": [],
+        "saturn": []
+    }
+
+    for entry in input_data:
+        # --- PASQUA ---
+        if entry.get("is_easter"):
+            m = str(entry['month']).zfill(2)
+            d = str(entry['day']).zfill(2)
+            full_date_str = f"{entry['year']}-{m}-{d}"
+            result["easter"] = full_date_str
+        
+        # --- EQUINOZI ---
+        if entry.get("season"):
+            m = str(entry['month']).zfill(2)
+            d = str(entry['day']).zfill(2)
+            full_date_str = f"{entry['year']}-{m}-{d}"
+            result['seasons'].append({
+                "date": full_date_str,
+                "event": entry['season_type']
+            })
+
+        # --- PIANETI INTERNI ---
+        for ip in ['mercury', 'venus']:
+          # Congiunzioni
+          if entry.get(f"{ip}_oc_type"):
+              event = "INF_CONJ" if entry[f"{ip}_oc_type"] == "ic" else "SUP_CONJ"
+              result[ip].append({
+                  "date": entry[f"{ip}_oc_time"],
+                  "event": event
+              })
+          
+          # Elongazioni massime
+          if entry.get(f"{ip}_elong_direction"):
+              event = "MEE" if entry[f"{ip}_elong_direction"] == "east" else "MEW"
+              result[ip].append({
+                  "date": entry[f"{ip}_elong_time"],
+                  "event": event,
+                  "degree": entry[f"{ip}_elong_degrees"]
+              })
+
+        # --- LUNA (Eclissi) ---
+        if entry.get("moon_eclipse_type_num"):
+            m = str(entry['month']).zfill(2)
+            d = str(entry['day']).zfill(2)
+            full_date_str = f"{entry['year']}-{m}-{d} {entry['moon_eclipse_time']}"
+            result["moon"].append({
+                "date": full_date_str,
+                "event": "MOON_ECL",
+                "type": entry["moon_eclipse_type_num"]
+            })
+
+        # --- PIANETI ESTERNI ---
+        # Congiunzioni
+        for ep in ['mars', 'jupiter', 'saturn']:
+          if entry.get(f"{ep}_oc_type"):
+              event = "CONJ" if entry[f"{ep}_oc_type"] == "c" else "OPP"
+              result[ep].append({
+                  "date": entry[f"{ep}_oc_time"],
+                  "event": event
+              })
+
+    return result
+
+
+def drawFirstPage(data, language):
     def _draw_planet_frame(ypos, text):
         text_frame = scribus.createText(17, ypos, 121, 3.5)
         scribus.setText(text, text_frame)
@@ -363,6 +436,7 @@ def drawFirstPage(year, language):
         scribus.setCharacterStyle('ephem_sym_ch_style')
 
     t = translator(language)
+    year = get_main_year(data)
 
     title_frame = scribus.createText(17, 80.213, 121, 12.803)
     scribus.setText(f"{year}", title_frame)
@@ -395,6 +469,26 @@ def drawFirstPage(year, language):
     scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, explanation_frame)
     
 
+def drawSecondPage(data, language):
+    planets = extract_planetary_events(data)
+
+    #--temp
+    planets_filename = generate_filename(prefix='planets_', ext='.py')
+    save_to_file(planets, planets_filename)
+    #--remove before release--/
+
+    # misure in 260215.1.sla
+    # frame ridimensionabile in Tests/height.py
+    #
+    # --- PASQUA ED EQUINOZI ---
+    # --- MERCURIO ---
+    # --- VENERE ---
+    # --- LUNA ---
+    # --- MARTE ---
+    # --- GIOVE ---
+    # --- SATURNO ---
+
+
 def create_planner_A5(data, language):
     """
     Orchestrates the creation of the entire A5 Planner.
@@ -421,36 +515,37 @@ def create_planner_A5(data, language):
     createTextStyles()
     scribus.saveDocAs(filename)
 
-    main_year = get_main_year(data)
     # scribus.progressSet(1)
-    drawFirstPage(main_year, language)
+    drawFirstPage(data, language)
+    scribus.newPage(-1)
+    drawSecondPage(data, language)
 
-    for item in page_data_list:
-        current_page = scribus.currentPage()
-        if current_page < total_pages:
-            scribus.newPage(-1)
-            pagesQty = scribus.pageCount()
-            # scribus.progressSet(pagesQty if pagesQty <= total_pages else total_pages)
-            #--temp
-            logger.log(f"starting page {current_page}")
-            logger.logmem()
-            #--remove before release--/
-            msg = template_replace(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
-            scribus.statusMessage(msg)
-            # Scribus getPageType: 2 for Right pages, 0 for Left pages
-            if scribus.getPageType(current_page) == 2:
-                draw_page('right', item)
-            elif scribus.getPageType(current_page) == 0:
-                draw_page('left', item)
-            else:
-                scribus.messageBox(
-                    "Planner Generator",
-                    f"Error: unknown page type for page {current_page}.",
-                    scribus.ICON_CRITICAL,
-                )
-                sys.exit(1)
-            if ((current_page > 0) and (current_page % 4 == 0)):
-                scribus.saveDoc()
+    # for item in page_data_list:
+    #     current_page = scribus.currentPage()
+    #     if current_page < total_pages:
+    #         scribus.newPage(-1)
+    #         pagesQty = scribus.pageCount()
+    #         # scribus.progressSet(pagesQty if pagesQty <= total_pages else total_pages)
+    #         #--temp
+    #         logger.log(f"starting page {current_page}")
+    #         logger.logmem()
+    #         #--remove before release--/
+    #         msg = template_replace(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
+    #         scribus.statusMessage(msg)
+    #         # Scribus getPageType: 2 for Right pages, 0 for Left pages
+    #         if scribus.getPageType(current_page) == 2:
+    #             draw_page('right', item)
+    #         elif scribus.getPageType(current_page) == 0:
+    #             draw_page('left', item)
+    #         else:
+    #             scribus.messageBox(
+    #                 "Planner Generator",
+    #                 f"Error: unknown page type for page {current_page}.",
+    #                 scribus.ICON_CRITICAL,
+    #             )
+    #             sys.exit(1)
+    #         if ((current_page > 0) and (current_page % 4 == 0)):
+    #             scribus.saveDoc()
     if scribus.haveDoc():
         scribus.saveDoc()
     

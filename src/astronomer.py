@@ -50,8 +50,8 @@ def opposition_conjunction(body, year, language):
     timezone = ZoneInfo(t("timezone"))
 
     l_body = body.lower()
-    if l_body not in ['mars', 'jupiter', 'saturn']:
-        raise ValueError('[opposition_conjunction]: Oppositions and conjunctions can only be calculated for Mars, Jupiter and Saturn')
+    if l_body not in ['mars', 'jupiter', 'saturn', 'mercury', 'venus']:
+        raise ValueError('[opposition_conjunction]: Oppositions and conjunctions can only be calculated for Mercury, Venus, Mars, Jupiter and Saturn')
     
     ts = load.timescale()
     planets = load(JPL_EPHEMERIS_FILE)
@@ -66,13 +66,28 @@ def opposition_conjunction(body, year, language):
     for ti, yi in zip(t, y):
         tz_time = ti.astimezone(timezone)
         oc = int(f"{yi}")
+        # oc_type:  ic -> inferior conjunction
+        #           sc -> superior conjunction
+        #           c -> conjunction
+        #           o -> opposition
+        oc_type = ''
+        if oc == 0:
+            if l_body in ['mercury', 'venus']:
+                oc_type = 'ic'
+            else:
+                oc_type = 'c'
+        else:
+            if l_body in ['mercury', 'venus']:
+                oc_type = 'sc'
+            else:
+                oc_type = 'o'
         result.append({
             'year': int(f"{ti.utc.year}"),
             'month': int(f"{ti.utc.month}"),
             'day': int(f"{ti.utc.day}"),
             f"{body}_oc_time": tz_time,
             f"{body}_oc": oc,
-            f"{body}_oc_description": 'conjuction' if oc == 0 else 'opposition'
+            f"{body}_oc_type": oc_type
         })
     
     return result

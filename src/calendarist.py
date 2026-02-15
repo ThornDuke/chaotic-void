@@ -11,7 +11,7 @@ import scribus  # pyright: ignore[reportMissingImports]
 from . import astronomer
 from .data.localization import translator, by_acronym
 from .data.holidays import holidays
-from .utilities import generate_filename
+from .utilities import generate_filename, save_to_file
 
 
 def generate_dates(anno: int) -> list[dict]:
@@ -179,7 +179,9 @@ def merge_calendar_data(target_list, **data_sources):
         "sun_data_list",
         "moon_data_list",
         "mercury_data_list",
+        "mercury_oc_data_list",
         "venus_data_list",
+        "venus_oc_data_list",
         "mars_data_list",
         "mars_oc_data_list",
         "jupiter_data_list",
@@ -234,12 +236,28 @@ def merge_calendar_data(target_list, **data_sources):
                 "mercury_elong_direction": "mercury_elong_direction"
             }
         },
+        "mercury_oc_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "mercury_oc_time": "mercury_oc_time",
+                "mercury_oc": "mercury_oc",
+                "mercury_oc_type": "mercury_oc_type"
+            },
+        },
+        "venus_oc_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "venus_oc_time": "venus_oc_time",
+                "venus_oc": "venus_oc",
+                "venus_oc_type": "venus_oc_type"
+            },
+        },
         "mars_oc_data_list": {
             "key_type": "ymd",
             "mapping": {
                 "mars_oc_time": "mars_oc_time",
                 "mars_oc": "mars_oc",
-                "mars_oc_description": "mars_oc_description"
+                "mars_oc_type": "mars_oc_type"
             },
         },
         "jupiter_oc_data_list": {
@@ -247,7 +265,7 @@ def merge_calendar_data(target_list, **data_sources):
             "mapping": {
                 "jupiter_oc_time": "jupiter_oc_time",
                 "jupiter_oc": "jupiter_oc",
-                "jupiter_oc_description": "jupiter_oc_description"
+                "jupiter_oc_type": "jupiter_oc_type"
             }
         },
         "saturn_oc_data_list": {
@@ -255,7 +273,7 @@ def merge_calendar_data(target_list, **data_sources):
             "mapping": {
                 "saturn_oc_time": "saturn_oc_time",
                 "saturn_oc": "saturn_oc",
-                "saturn_oc_description": "saturn_oc_description"
+                "saturn_oc_type": "saturn_oc_type"
             }
         }
     }
@@ -434,10 +452,12 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     notify(4, "cal_mercury_eph")
     mercury_data = astronomer.get_ephemeris_data("Mercury", year, language)
     mercury_max_elongation_data = astronomer.max_elongation('mercury', year, language)
+    mercury_oc_data = astronomer.opposition_conjunction('mercury', year, language)
 
     notify(5, "cal_venus_eph")
     venus_data = astronomer.get_ephemeris_data("Venus", year, language)
     venus_max_elongation_data = astronomer.max_elongation('venus', year, language)
+    venus_oc_data = astronomer.opposition_conjunction('venus', year, language)
 
     notify(6, "cal_mars_eph")
     mars_data = astronomer.get_ephemeris_data("Mars barycenter", year, language)
@@ -466,7 +486,9 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
         fixed_holidays_list=fixed_holidays,
         seasons_list=seasons,
         mercury_data_list=mercury_data,
+        mercury_oc_data_list=mercury_oc_data,
         venus_data_list=venus_data,
+        venus_oc_data_list=venus_oc_data,
         mars_data_list=mars_data,
         mars_oc_data_list=mars_oc_data,
         jupiter_data_list=jupiter_data,
@@ -478,8 +500,8 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     )
 
     #--temp
-    calendar_filename = generate_filename(prefix='calendar_', ext='.json')
-    print_as_json(full_calendar, calendar_filename)
+    calendar_filename = generate_filename(prefix='calendar_', ext='.py')
+    save_to_file(full_calendar, calendar_filename)
     #--remove before release--/
 
     scribus.progressReset()

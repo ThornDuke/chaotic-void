@@ -2,6 +2,7 @@
 import re
 import datetime
 import sys
+import pprint
 import importlib.metadata
 import scribus  # pyright: ignore[reportMissingImports]
 from .data.localization import by_acronym, translator
@@ -299,3 +300,9 @@ def generate_filename(prefix='', suffix='', ext=''):
     now = datetime.datetime.now()
     timestamp = now.strftime('%y%m%dT%H%M%S')
     return f"{prefix}{timestamp}{suffix}{ext}"
+
+def save_to_file(data, filename):
+    formatted_data = pprint.pformat(data, sort_dicts=False)
+    with open(filename, 'w') as f:
+        f.write(formatted_data)
+        f.close()
