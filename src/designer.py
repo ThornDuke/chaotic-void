@@ -101,6 +101,8 @@ def createTextStyles():
     scribus.createCharStyle(name='text_ch_style', font='Simoncini Garamond Std Roman', fontsize=8.30)
     scribus.createCharStyle(name='moonphase_ch_style', font='Symbola Regular', fontsize=8.30)
     scribus.createCharStyle(name='ephem_sym_ch_style', font='AstroGadget Regular', fontsize=8.30)
+    scribus.createCharStyle(name='smallcaps_ch_style', font='Simoncini Garamond Std Roman', fontsize=8.30, features='smallcaps')
+    scribus.createCharStyle(name='bold_ch_style', font='Simoncini Garamond Std Bold', fontsize=8.30)
 
     scribus.createParagraphStyle('title_par_style', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'title_ch_style')
     scribus.createParagraphStyle('header_left_par_style', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'header_ch_style')
@@ -109,6 +111,8 @@ def createTextStyles():
     scribus.createParagraphStyle('text_left_par_style', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'text_ch_style')
     scribus.createParagraphStyle('text_right_par_style', 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'text_ch_style')
     scribus.createParagraphStyle('title_explanation_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'text_ch_style')
+    scribus.createParagraphStyle('text_smallcaps_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'smallcaps_ch_style')
+    scribus.createParagraphStyle('text_bold_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'bold_ch_style')
 
 
 def draw_lines(side):
@@ -470,6 +474,23 @@ def drawFirstPage(data, language):
     
 
 def drawSecondPage(data, language):
+    def _resize(frame):
+        w, _ = scribus.getSize(frame)
+        currh = 190
+        while True:
+            scribus.sizeObject(w, currh, frame)
+            if scribus.textOverflows(frame, 1) > 0:
+                break
+            currh -= 1
+        
+        currh += 2
+        scribus.sizeObject(w, currh, frame)
+        return currh
+
+    def _date_str(stringa_data):
+        dt = datetime.datetime.strptime(stringa_data, '%Y-%m-%d')
+        return (dt.strftime('%Y'), dt.strftime('%m'), dt.strftime('%d'))
+
     planets = extract_planetary_events(data)
 
     #--temp
@@ -478,9 +499,35 @@ def drawSecondPage(data, language):
     #--remove before release--/
 
     # misure in 260215.1.sla
-    # frame ridimensionabile in Tests/height.py
-    #
     # --- PASQUA ED EQUINOZI ---
+    right_text = ""
+    for item in planets.keys():
+        if item == "easter":
+            _, month, day = _date_str(planets["easter"])
+            right_text += f"{day} {month}\n"
+        elif item == 'seasons':
+            for season in planets["seasons"]:
+                _, month, day = _date_str(season["date"])
+                right_text += f"{day} {month}"
+                right_text += "\n" if season["event"] < 3 else ""
+    
+    season_right_frame = scribus.createText(77, 10, 54, 120)
+    scribus.setText(right_text, season_right_frame)
+    scribus.setParagraphStyle('text_left_par_style', season_right_frame)
+    # scribus.setParagraphStyle('text_smallcaps_par_style', season_right_frame)
+    season_right_frame_height = _resize(season_right_frame)
+    left_text = (
+        "Pasqua\n"
+        "Equinozio di Primavera\n"
+        "Solstizio d'Estate\n"
+        "Equinozio d'Autunno\n"
+        "Solstizio d'Inverno"
+    )
+    season_left_frame = scribus.createText(10, 10, 40, season_right_frame_height)
+    scribus.setText(left_text, season_left_frame)
+    scribus.setParagraphStyle('text_bold_par_style', season_left_frame)
+
+
     # --- MERCURIO ---
     # --- VENERE ---
     # --- LUNA ---
