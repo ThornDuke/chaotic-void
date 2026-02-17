@@ -371,6 +371,20 @@ def resize_height(frame):
     return currh
 
 
+def resize_width(frame):
+    _, h = scribus.getSize(frame)
+    currw = 120
+    step = 1
+    while True:
+        scribus.sizeObject(currw, h, frame)
+        if (scribus.textOverflows(frame, 1) > 0) or (currw == 0):
+            break
+        currw -= step
+    currw += step
+    scribus.sizeObject(currw, h, frame)
+    return currw
+
+
 def extract_planetary_events(input_data):
     # Struttura di base del risultato
     result = {
@@ -502,6 +516,10 @@ def drawSecondPage(data, language):
             dt.strftime('%S')
         )
 
+    months = ['January', 'February', 'March', 'April',
+              'May', 'June', 'July', 'August',
+              'September', 'October', 'November', 'December']
+    t = translator(language)
     y_gap = 2
     planets = extract_planetary_events(data)
 
@@ -513,30 +531,31 @@ def drawSecondPage(data, language):
     # --- PASQUA ED EQUINOZI ---
     # frame sinistra
     seasons_left_text = (
-        "Pasqua\n"
-        "Equinozio di Primavera\n"
-        "Solstizio d'Estate\n"
-        "Equinozio d'Autunno\n"
-        "Solstizio d'Inverno"
+        f"{t('easter')}\n"
+        f"{t('eq_spring')}\n"
+        f"{t('eq_summer')}\n"
+        f"{t('eq_autumn')}\n"
+        f"{t('eq_winter')}"
     )
     season_left_frame = scribus.createText(10, 10, 40, 100)
     scribus.setText(seasons_left_text, season_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', season_left_frame)
     season_left_frame_height = resize_height(season_left_frame)
+    season_left_frame_width = resize_width(season_left_frame)
     # frame destra
     seasons_right_text = ""
     for item in planets.keys():
         if item == "easter":
             _, month, day, _, _, _ = _date_str(planets["easter"])
-            seasons_right_text += f"{day} {month}\n"
+            seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
         elif item == 'seasons':
             for season in planets["seasons"]:
                 _, month, day, _, _, _ = _date_str(season["date"])
-                seasons_right_text += f"{day} {month}\n"
+                seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
     if seasons_right_text.endswith("\n"):
         seasons_right_text = seasons_right_text[:-1]
     
-    season_right_frame = scribus.createText(77, 10, 54, 120)
+    season_right_frame = scribus.createText(82, 10, 49, 120)
     scribus.setText(seasons_right_text, season_right_frame)
     scribus.setParagraphStyle('text_left_par_style', season_right_frame)
     season_right_frame_height = resize_height(season_right_frame)
@@ -544,7 +563,7 @@ def drawSecondPage(data, language):
     # --- MERCURIO ---
     mercury_frame_y = 10 + y_gap + max([season_right_frame_height, season_left_frame_height])
     # frame sinistra
-    mercury_left_text = "Mercurio"
+    mercury_left_text = f"{t("mercury")}"
     mercury_left_frame = scribus.createText(10, mercury_frame_y, 40, 100)
     scribus.setText(mercury_left_text, mercury_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', mercury_left_frame)
@@ -559,18 +578,18 @@ def drawSecondPage(data, language):
             mercury_center_text += "\n"
     if mercury_center_text.endswith("\n"):
         mercury_center_text = mercury_center_text[:-1]
-    mercury_center_frame = scribus.createText(51, mercury_frame_y, 25, 100)
+    mercury_center_frame = scribus.createText(51, mercury_frame_y, 30, 100)
     scribus.setText(mercury_center_text, mercury_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', mercury_center_frame)
     mercury_center_frame_height = resize_height(mercury_center_frame)
     # frame destra
     mercury_right_text = ""
     for item in planets["mercury"]:
-        _, month, day, _, _, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
-        mercury_right_text += f"{day} {month}\n"
+        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
+        mercury_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if mercury_right_text.endswith("\n"):
         mercury_right_text = mercury_right_text[:-1]
-    mercury_right_frame = scribus.createText(77, mercury_frame_y, 54, 100)
+    mercury_right_frame = scribus.createText(82, mercury_frame_y, 49, 100)
     scribus.setText(mercury_right_text, mercury_right_frame)
     scribus.setParagraphStyle('text_left_par_style', mercury_right_frame)
     mercury_right_frame_height = resize_height(mercury_right_frame)
@@ -578,7 +597,7 @@ def drawSecondPage(data, language):
     # --- VENERE ---
     venus_frame_y = mercury_frame_y + y_gap + max([mercury_left_frame_height, mercury_center_frame_height, mercury_right_frame_height])
     # frame sinistra
-    venus_left_text = "Venere"
+    venus_left_text = f"{t("venus")}"
     venus_left_frame = scribus.createText(10, venus_frame_y, 40, 100)
     scribus.setText(venus_left_text, venus_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', venus_left_frame)
@@ -593,18 +612,18 @@ def drawSecondPage(data, language):
             venus_center_text += "\n"
     if venus_center_text.endswith("\n"):
         venus_center_text = venus_center_text[:-1]
-    venus_center_frame = scribus.createText(51, venus_frame_y, 25, 100)
+    venus_center_frame = scribus.createText(51, venus_frame_y, 30, 100)
     scribus.setText(venus_center_text, venus_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', venus_center_frame)
     venus_center_frame_height = resize_height(venus_center_frame)
     # frame destra
     venus_right_text = ""
     for item in planets["venus"]:
-        _, month, day, _, _, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
-        venus_right_text += f"{day} {month}\n"
+        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
+        venus_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if venus_right_text.endswith("\n"):
         venus_right_text = venus_right_text[:-1]
-    venus_right_frame = scribus.createText(77, venus_frame_y, 54, 100)
+    venus_right_frame = scribus.createText(82, venus_frame_y, 49, 100)
     scribus.setText(venus_right_text, venus_right_frame)
     scribus.setParagraphStyle('text_left_par_style', venus_right_frame)
     venus_right_frame_height = resize_height(venus_right_frame)
@@ -612,7 +631,7 @@ def drawSecondPage(data, language):
     # --- LUNA ---
     moon_frame_y = venus_frame_y + y_gap + max([venus_left_frame_height, venus_center_frame_height, venus_right_frame_height])
     # frame sinistra
-    moon_left_text = "Luna"
+    moon_left_text = f"{t("moon")}"
     moon_left_frame = scribus.createText(10, moon_frame_y, 40, 100)
     scribus.setText(moon_left_text, moon_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', moon_left_frame)
@@ -620,10 +639,10 @@ def drawSecondPage(data, language):
     # frame centro
     moon_center_text = ""
     for item in planets["moon"]:
-        moon_center_text += f"{item["event"].lower().replace("_", " ")} {item["type"]}\n"
+        moon_center_text += f"{item["event"].lower().replace("_", " ")} {["pen", "part", "tot"][int(item["type"])]}\n"
     if moon_center_text.endswith("\n"):
         moon_center_text = moon_center_text[:-1]
-    moon_center_frame = scribus.createText(51, moon_frame_y, 25, 100)
+    moon_center_frame = scribus.createText(51, moon_frame_y, 30, 100)
     scribus.setText(moon_center_text, moon_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', moon_center_frame)
     moon_center_frame_height = resize_height(moon_center_frame)
@@ -631,10 +650,10 @@ def drawSecondPage(data, language):
     moon_right_text = ""
     for item in planets["moon"]:
         _, month, day, hour, minute, _ = _date_str(item["date"])
-        moon_right_text += f"{day} {month} {hour}:{minute}\n"
+        moon_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if moon_right_text.endswith("\n"):
         moon_right_text = moon_right_text[:-1]
-    moon_right_frame = scribus.createText(77, moon_frame_y, 54, 100)
+    moon_right_frame = scribus.createText(82, moon_frame_y, 49, 100)
     scribus.setText(moon_right_text, moon_right_frame)
     scribus.setParagraphStyle('text_left_par_style', moon_right_frame)
     moon_right_frame_height = resize_height(moon_right_frame)
@@ -642,7 +661,7 @@ def drawSecondPage(data, language):
     # --- MARTE ---
     mars_frame_y = moon_frame_y + y_gap + max([moon_left_frame_height, moon_center_frame_height, moon_right_frame_height])
     # frame sinistra
-    mars_left_text = "Marte"
+    mars_left_text = f"{t("mars")}"
     mars_left_frame = scribus.createText(10, mars_frame_y, 40, 100)
     scribus.setText(mars_left_text, mars_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', mars_left_frame)
@@ -653,7 +672,7 @@ def drawSecondPage(data, language):
         mars_center_text += f"{item["event"].lower().replace("_", " ")}\n"
     if mars_center_text.endswith("\n"):
         mars_center_text = mars_center_text[:-1]
-    mars_center_frame = scribus.createText(51, mars_frame_y, 25, 100)
+    mars_center_frame = scribus.createText(51, mars_frame_y, 30, 100)
     scribus.setText(mars_center_text, mars_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', mars_center_frame)
     mars_center_frame_height = resize_height(mars_center_frame)
@@ -661,10 +680,10 @@ def drawSecondPage(data, language):
     mars_right_text = ""
     for item in planets["mars"]:
         _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        mars_right_text += f"{day} {month} {hour}:{minute}\n"
+        mars_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if mars_right_text.endswith("\n"):
         mars_right_text = mars_right_text[:-1]
-    mars_right_frame = scribus.createText(77, mars_frame_y, 54, 100)
+    mars_right_frame = scribus.createText(82, mars_frame_y, 49, 100)
     scribus.setText(mars_right_text, mars_right_frame)
     scribus.setParagraphStyle('text_left_par_style', mars_right_frame)
     mars_right_frame_height = resize_height(mars_right_frame)
@@ -672,7 +691,7 @@ def drawSecondPage(data, language):
     # --- GIOVE ---
     jupiter_frame_y = mars_frame_y + y_gap + max([mars_left_frame_height, mars_center_frame_height, mars_right_frame_height])
     # frame sinistra
-    jupiter_left_text = "Giove"
+    jupiter_left_text = f"{t("jupiter")}"
     jupiter_left_frame = scribus.createText(10, jupiter_frame_y, 40, 100)
     scribus.setText(jupiter_left_text, jupiter_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', jupiter_left_frame)
@@ -683,7 +702,7 @@ def drawSecondPage(data, language):
         jupiter_center_text += f"{item["event"].lower().replace("_", " ")}\n"
     if jupiter_center_text.endswith("\n"):
         jupiter_center_text = jupiter_center_text[:-1]
-    jupiter_center_frame = scribus.createText(51, jupiter_frame_y, 25, 100)
+    jupiter_center_frame = scribus.createText(51, jupiter_frame_y, 30, 100)
     scribus.setText(jupiter_center_text, jupiter_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', jupiter_center_frame)
     jupiter_center_frame_height = resize_height(jupiter_center_frame)
@@ -691,10 +710,10 @@ def drawSecondPage(data, language):
     jupiter_right_text = ""
     for item in planets["jupiter"]:
         _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        jupiter_right_text += f"{day} {month} {hour}:{minute}\n"
+        jupiter_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if jupiter_right_text.endswith("\n"):
         jupiter_right_text = jupiter_right_text[:-1]
-    jupiter_right_frame = scribus.createText(77, jupiter_frame_y, 54, 100)
+    jupiter_right_frame = scribus.createText(82, jupiter_frame_y, 49, 100)
     scribus.setText(jupiter_right_text, jupiter_right_frame)
     scribus.setParagraphStyle('text_left_par_style', jupiter_right_frame)
     jupiter_right_frame_height = resize_height(jupiter_right_frame)
@@ -702,7 +721,7 @@ def drawSecondPage(data, language):
     # --- SATURNO ---
     saturn_frame_y = jupiter_frame_y + y_gap + max([jupiter_left_frame_height, jupiter_center_frame_height, jupiter_right_frame_height])
     # frame sinistra
-    saturn_left_text = "Saturno"
+    saturn_left_text = f"{t("saturn")}"
     saturn_left_frame = scribus.createText(10, saturn_frame_y, 40, 100)
     scribus.setText(saturn_left_text, saturn_left_frame)
     scribus.setParagraphStyle('text_bold_par_style', saturn_left_frame)
@@ -713,7 +732,7 @@ def drawSecondPage(data, language):
         saturn_center_text += f"{item["event"].lower().replace("_", " ")}\n"
     if saturn_center_text.endswith("\n"):
         saturn_center_text = saturn_center_text[:-1]
-    saturn_center_frame = scribus.createText(51, saturn_frame_y, 25, 100)
+    saturn_center_frame = scribus.createText(51, saturn_frame_y, 30, 100)
     scribus.setText(saturn_center_text, saturn_center_frame)
     scribus.setParagraphStyle('text_smallcaps_par_style', saturn_center_frame)
     saturn_center_frame_height = resize_height(saturn_center_frame)
@@ -721,10 +740,10 @@ def drawSecondPage(data, language):
     saturn_right_text = ""
     for item in planets["saturn"]:
         _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        saturn_right_text += f"{day} {month} {hour}:{minute}\n"
+        saturn_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
     if saturn_right_text.endswith("\n"):
         saturn_right_text = saturn_right_text[:-1]
-    saturn_right_frame = scribus.createText(77, saturn_frame_y, 54, 100)
+    saturn_right_frame = scribus.createText(82, saturn_frame_y, 49, 100)
     scribus.setText(saturn_right_text, saturn_right_frame)
     scribus.setParagraphStyle('text_left_par_style', saturn_right_frame)
     saturn_right_frame_height = resize_height(saturn_right_frame)
