@@ -182,7 +182,7 @@ def check_requirements():
     # --- Fonts ---
     report["fonts"] = font_availability(FONTS)
 
-    #--temp
+    #--temp / debug
     # with open('report.txt', 'w') as rf:
     #   for item in report:
     #     rf.write(f"{item}: {report[item]}\n")

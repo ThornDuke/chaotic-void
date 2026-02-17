@@ -14,7 +14,7 @@ import scribus  # pyright: ignore[reportMissingImports]
 from .data.lines import get_A5_line_data
 from .data.localization import translator, by_acronym
 from .utilities import template_replace, round_dt_to_min, generate_filename, save_to_file
-#--temp
+#--temp / debug
 from src.archivist import Logger
 #--remove before release--/
 
@@ -103,6 +103,9 @@ def createTextStyles():
     scribus.createCharStyle(name='ephem_sym_ch_style', font='AstroGadget Regular', fontsize=8.30)
     scribus.createCharStyle(name='smallcaps_ch_style', font='Simoncini Garamond Std Roman', fontsize=8.30, features='smallcaps')
     scribus.createCharStyle(name='bold_ch_style', font='Simoncini Garamond Std Bold', fontsize=8.30)
+    scribus.createCharStyle(name='bold10_ch_style', font='Simoncini Garamond Std Bold', fontsize=10)
+    scribus.createCharStyle(name='smallcaps10_ch_style', font='Simoncini Garamond Std Roman', fontsize=10, features='smallcaps')
+    scribus.createCharStyle(name='text10_ch_style', font='Simoncini Garamond Std Roman', fontsize=10)
 
     scribus.createParagraphStyle('title_par_style', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'title_ch_style')
     scribus.createParagraphStyle('header_left_par_style', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'header_ch_style')
@@ -113,6 +116,9 @@ def createTextStyles():
     scribus.createParagraphStyle('title_explanation_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'text_ch_style')
     scribus.createParagraphStyle('text_smallcaps_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'smallcaps_ch_style')
     scribus.createParagraphStyle('text_bold_par_style', 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'bold_ch_style')
+    scribus.createParagraphStyle('planets_bold_par_style', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'bold10_ch_style')
+    scribus.createParagraphStyle('planets_smallcaps_par_style', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'smallcaps10_ch_style')
+    scribus.createParagraphStyle('planets_left_par_style', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'text10_ch_style')
 
 
 def draw_lines(side):
@@ -499,254 +505,374 @@ def drawFirstPage(data, language):
     scribus.setFont("Simoncini Garamond Std Roman", explanation_frame)
     scribus.setParagraphStyle('title_explanation_par_style', explanation_frame)
     scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, explanation_frame)
-    
+
 
 def drawSecondPage(data, language):
-    def _date_str(stringa_data):
-        try:
-            dt = datetime.datetime.strptime(stringa_data, '%Y-%m-%d %H:%M:%S.%f')
-        except ValueError:
-            dt = datetime.datetime.strptime(stringa_data, '%Y-%m-%d')
+    # --- HELPER FUNCTIONS ---
+    def _get_date_parts(date_obj_or_str):
+        """Restituisce le parti della data (Y, m, d, H, M, S). Accetta datetime o str."""
+        if isinstance(date_obj_or_str, str):
+            try:
+                dt = datetime.datetime.strptime(date_obj_or_str, '%Y-%m-%d %H:%M:%S.%f')
+            except ValueError:
+                dt = datetime.datetime.strptime(date_obj_or_str, '%Y-%m-%d')
+        else:
+            dt = date_obj_or_str
+        
         return (
-            dt.strftime('%Y'), 
-            dt.strftime('%m'), 
-            dt.strftime('%d'), 
-            dt.strftime('%H'), 
-            dt.strftime('%M'), 
-            dt.strftime('%S')
+            dt.strftime('%Y'), dt.strftime('%m'), dt.strftime('%d'),
+            dt.strftime('%H'), dt.strftime('%M'), dt.strftime('%S')
         )
 
-    months = ['January', 'February', 'March', 'April',
-              'May', 'June', 'July', 'August',
-              'September', 'October', 'November', 'December']
-    t = translator(language)
-    y_gap = 2
-    planets = extract_planetary_events(data)
+    def _draw_frame(x, y, w, h, text, style):
+        """Crea un frame Scribus, imposta testo e stile, ridimensiona e restituisce l'altezza."""
+        if not text: return 0
+        frame = scribus.createText(x, y, w, h)
+        scribus.setText(text, frame)
+        scribus.setParagraphStyle(style, frame)
+        return resize_height(frame) # Assumo che questa funzione esista nel contesto globale
 
-    #--temp
+    def _format_event_line(item, p_key):
+        """Formatta la riga dell'evento per la colonna centrale."""
+        text = item["event"].lower().replace("_", " ")
+        
+        # Logiche specifiche per pianeta
+        if p_key in ["mercury", "venus"] and item.get("degree"):
+            text += f" {item['degree']:.1f}°"
+        elif p_key == "moon":
+            moon_phases = ["C", "B", "A"]
+            text += f" {moon_phases[int(item['type'])]}"
+            
+        return text
+
+    # --- SETUP ---
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 
+              'July', 'August', 'September', 'October', 'November', 'December']
+    t = translator(language)
+    planets = extract_planetary_events(data)
+    
+    #--temp / debug
     planets_filename = generate_filename(prefix='planets_', ext='.py')
     save_to_file(planets, planets_filename)
-    #--remove before release--/
-
-    # --- PASQUA ED EQUINOZI ---
-    # frame sinistra
-    seasons_left_text = (
-        f"{t('easter')}\n"
-        f"{t('eq_spring')}\n"
-        f"{t('eq_summer')}\n"
-        f"{t('eq_autumn')}\n"
-        f"{t('eq_winter')}"
-    )
-    season_left_frame = scribus.createText(10, 10, 40, 100)
-    scribus.setText(seasons_left_text, season_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', season_left_frame)
-    season_left_frame_height = resize_height(season_left_frame)
-    season_left_frame_width = resize_width(season_left_frame)
-    # frame destra
-    seasons_right_text = ""
-    for item in planets.keys():
-        if item == "easter":
-            _, month, day, _, _, _ = _date_str(planets["easter"])
-            seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
-        elif item == 'seasons':
-            for season in planets["seasons"]:
-                _, month, day, _, _, _ = _date_str(season["date"])
-                seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
-    if seasons_right_text.endswith("\n"):
-        seasons_right_text = seasons_right_text[:-1]
+    #--remove before release--/ 
     
-    season_right_frame = scribus.createText(82, 10, 49, 120)
-    scribus.setText(seasons_right_text, season_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', season_right_frame)
-    season_right_frame_height = resize_height(season_right_frame)
+    current_y = 10
+    y_gap = 2
 
-    # --- MERCURIO ---
-    mercury_frame_y = 10 + y_gap + max([season_right_frame_height, season_left_frame_height])
-    # frame sinistra
-    mercury_left_text = f"{t("mercury")}"
-    mercury_left_frame = scribus.createText(10, mercury_frame_y, 40, 100)
-    scribus.setText(mercury_left_text, mercury_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', mercury_left_frame)
-    mercury_left_frame_height = resize_height(mercury_left_frame)
-    # frame centro
-    mercury_center_text = ""
-    for item in planets["mercury"]:
-        mercury_center_text += f"{item["event"].lower().replace("_", " ")}"
-        if item.get("degree"):
-            mercury_center_text += f" {item["degree"]:.1f}°\n"
-        else:
-            mercury_center_text += "\n"
-    if mercury_center_text.endswith("\n"):
-        mercury_center_text = mercury_center_text[:-1]
-    mercury_center_frame = scribus.createText(51, mercury_frame_y, 30, 100)
-    scribus.setText(mercury_center_text, mercury_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', mercury_center_frame)
-    mercury_center_frame_height = resize_height(mercury_center_frame)
-    # frame destra
-    mercury_right_text = ""
-    for item in planets["mercury"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
-        mercury_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if mercury_right_text.endswith("\n"):
-        mercury_right_text = mercury_right_text[:-1]
-    mercury_right_frame = scribus.createText(82, mercury_frame_y, 49, 100)
-    scribus.setText(mercury_right_text, mercury_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', mercury_right_frame)
-    mercury_right_frame_height = resize_height(mercury_right_frame)
+    # --- 1. SEZIONE PASQUA ED EQUINOZI (Gestita a parte per formato diverso) ---
+    left_text = "\n".join([t('easter'), t('eq_spring'), t('eq_summer'), t('eq_autumn'), t('eq_winter')])
+    
+    right_lines = []
+    # Pasqua
+    if "easter" in planets:
+        _, m, d, _, _, _ = _get_date_parts(planets["easter"])
+        right_lines.append(f"{d} {t(months[int(m) - 1])}")
+    # Stagioni
+    if "seasons" in planets:
+        for season in planets["seasons"]:
+            _, m, d, _, _, _ = _get_date_parts(season["date"])
+            right_lines.append(f"{d} {t(months[int(m) - 1])}")
 
-    # --- VENERE ---
-    venus_frame_y = mercury_frame_y + y_gap + max([mercury_left_frame_height, mercury_center_frame_height, mercury_right_frame_height])
-    # frame sinistra
-    venus_left_text = f"{t("venus")}"
-    venus_left_frame = scribus.createText(10, venus_frame_y, 40, 100)
-    scribus.setText(venus_left_text, venus_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', venus_left_frame)
-    venus_left_frame_height = resize_height(venus_left_frame)
-    # frame centro
-    venus_center_text = ""
-    for item in planets["venus"]:
-        venus_center_text += f"{item["event"].lower().replace("_", " ")}"
-        if item.get("degree"):
-            venus_center_text += f" {item["degree"]:.1f}°\n"
-        else:
-            venus_center_text += "\n"
-    if venus_center_text.endswith("\n"):
-        venus_center_text = venus_center_text[:-1]
-    venus_center_frame = scribus.createText(51, venus_frame_y, 30, 100)
-    scribus.setText(venus_center_text, venus_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', venus_center_frame)
-    venus_center_frame_height = resize_height(venus_center_frame)
-    # frame destra
-    venus_right_text = ""
-    for item in planets["venus"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d"))
-        venus_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if venus_right_text.endswith("\n"):
-        venus_right_text = venus_right_text[:-1]
-    venus_right_frame = scribus.createText(82, venus_frame_y, 49, 100)
-    scribus.setText(venus_right_text, venus_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', venus_right_frame)
-    venus_right_frame_height = resize_height(venus_right_frame)
+    h_left = _draw_frame(10, current_y, 40, 100, left_text, 'planets_bold_par_style')
+    h_right = _draw_frame(82, current_y, 49, 120, "\n".join(right_lines), 'planets_left_par_style')
+    
+    current_y += max(h_left, h_right) + y_gap
 
-    # --- LUNA ---
-    moon_frame_y = venus_frame_y + y_gap + max([venus_left_frame_height, venus_center_frame_height, venus_right_frame_height])
-    # frame sinistra
-    moon_left_text = f"{t("moon")}"
-    moon_left_frame = scribus.createText(10, moon_frame_y, 40, 100)
-    scribus.setText(moon_left_text, moon_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', moon_left_frame)
-    moon_left_frame_height = resize_height(moon_left_frame)
-    # frame centro
-    moon_center_text = ""
-    for item in planets["moon"]:
-        moon_center_text += f"{item["event"].lower().replace("_", " ")} {["pen", "part", "tot"][int(item["type"])]}\n"
-    if moon_center_text.endswith("\n"):
-        moon_center_text = moon_center_text[:-1]
-    moon_center_frame = scribus.createText(51, moon_frame_y, 30, 100)
-    scribus.setText(moon_center_text, moon_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', moon_center_frame)
-    moon_center_frame_height = resize_height(moon_center_frame)
-    # frame destra
-    moon_right_text = ""
-    for item in planets["moon"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"])
-        moon_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if moon_right_text.endswith("\n"):
-        moon_right_text = moon_right_text[:-1]
-    moon_right_frame = scribus.createText(82, moon_frame_y, 49, 100)
-    scribus.setText(moon_right_text, moon_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', moon_right_frame)
-    moon_right_frame_height = resize_height(moon_right_frame)
+    # --- 2. SEZIONE PIANETI (Ciclo generico) ---
+    # Lista ordinata delle chiavi dei pianeti da processare
+    planet_keys = ["mercury", "venus", "moon", "mars", "jupiter", "saturn"]
 
-    # --- MARTE ---
-    mars_frame_y = moon_frame_y + y_gap + max([moon_left_frame_height, moon_center_frame_height, moon_right_frame_height])
-    # frame sinistra
-    mars_left_text = f"{t("mars")}"
-    mars_left_frame = scribus.createText(10, mars_frame_y, 40, 100)
-    scribus.setText(mars_left_text, mars_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', mars_left_frame)
-    mars_left_frame_height = resize_height(mars_left_frame)
-    # frame centro
-    mars_center_text = ""
-    for item in planets["mars"]:
-        mars_center_text += f"{item["event"].lower().replace("_", " ")}\n"
-    if mars_center_text.endswith("\n"):
-        mars_center_text = mars_center_text[:-1]
-    mars_center_frame = scribus.createText(51, mars_frame_y, 30, 100)
-    scribus.setText(mars_center_text, mars_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', mars_center_frame)
-    mars_center_frame_height = resize_height(mars_center_frame)
-    # frame destra
-    mars_right_text = ""
-    for item in planets["mars"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        mars_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if mars_right_text.endswith("\n"):
-        mars_right_text = mars_right_text[:-1]
-    mars_right_frame = scribus.createText(82, mars_frame_y, 49, 100)
-    scribus.setText(mars_right_text, mars_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', mars_right_frame)
-    mars_right_frame_height = resize_height(mars_right_frame)
+    for p_key in planet_keys:
+        items = planets.get(p_key)
+        if not items:
+            continue
 
-    # --- GIOVE ---
-    jupiter_frame_y = mars_frame_y + y_gap + max([mars_left_frame_height, mars_center_frame_height, mars_right_frame_height])
-    # frame sinistra
-    jupiter_left_text = f"{t("jupiter")}"
-    jupiter_left_frame = scribus.createText(10, jupiter_frame_y, 40, 100)
-    scribus.setText(jupiter_left_text, jupiter_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', jupiter_left_frame)
-    jupiter_left_frame_height = resize_height(jupiter_left_frame)
-    # frame centro
-    jupiter_center_text = ""
-    for item in planets["jupiter"]:
-        jupiter_center_text += f"{item["event"].lower().replace("_", " ")}\n"
-    if jupiter_center_text.endswith("\n"):
-        jupiter_center_text = jupiter_center_text[:-1]
-    jupiter_center_frame = scribus.createText(51, jupiter_frame_y, 30, 100)
-    scribus.setText(jupiter_center_text, jupiter_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', jupiter_center_frame)
-    jupiter_center_frame_height = resize_height(jupiter_center_frame)
-    # frame destra
-    jupiter_right_text = ""
-    for item in planets["jupiter"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        jupiter_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if jupiter_right_text.endswith("\n"):
-        jupiter_right_text = jupiter_right_text[:-1]
-    jupiter_right_frame = scribus.createText(82, jupiter_frame_y, 49, 100)
-    scribus.setText(jupiter_right_text, jupiter_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', jupiter_right_frame)
-    jupiter_right_frame_height = resize_height(jupiter_right_frame)
+        # Preparazione testi
+        # Sinistra: Nome pianeta
+        text_left = t(p_key)
+        
+        # Centro: Descrizione eventi
+        center_lines = [_format_event_line(item, p_key) for item in items]
+        text_center = "\n".join(center_lines)
+        
+        # Destra: Date e Ore
+        right_lines = []
+        for item in items:
+            # Gestisce sia datetime objects che stringhe nel dizionario originale
+            d_obj = item["date"] 
+            _, m, d, H, M, _ = _get_date_parts(d_obj)
+            right_lines.append(f"{d} {t(months[int(m) - 1])} h{H}:{M}")
+        text_right = "\n".join(right_lines)
 
-    # --- SATURNO ---
-    saturn_frame_y = jupiter_frame_y + y_gap + max([jupiter_left_frame_height, jupiter_center_frame_height, jupiter_right_frame_height])
-    # frame sinistra
-    saturn_left_text = f"{t("saturn")}"
-    saturn_left_frame = scribus.createText(10, saturn_frame_y, 40, 100)
-    scribus.setText(saturn_left_text, saturn_left_frame)
-    scribus.setParagraphStyle('text_bold_par_style', saturn_left_frame)
-    saturn_left_frame_height = resize_height(saturn_left_frame)
-    # frame centro
-    saturn_center_text = ""
-    for item in planets["saturn"]:
-        saturn_center_text += f"{item["event"].lower().replace("_", " ")}\n"
-    if saturn_center_text.endswith("\n"):
-        saturn_center_text = saturn_center_text[:-1]
-    saturn_center_frame = scribus.createText(51, saturn_frame_y, 30, 100)
-    scribus.setText(saturn_center_text, saturn_center_frame)
-    scribus.setParagraphStyle('text_smallcaps_par_style', saturn_center_frame)
-    saturn_center_frame_height = resize_height(saturn_center_frame)
-    # frame destra
-    saturn_right_text = ""
-    for item in planets["saturn"]:
-        _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
-        saturn_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
-    if saturn_right_text.endswith("\n"):
-        saturn_right_text = saturn_right_text[:-1]
-    saturn_right_frame = scribus.createText(82, saturn_frame_y, 49, 100)
-    scribus.setText(saturn_right_text, saturn_right_frame)
-    scribus.setParagraphStyle('text_left_par_style', saturn_right_frame)
-    saturn_right_frame_height = resize_height(saturn_right_frame)
+        # Disegno frames
+        # Nota: usiamo current_y calcolato dal blocco precedente
+        h_l = _draw_frame(10, current_y, 40, 100, text_left, 'planets_bold_par_style')
+        h_c = _draw_frame(51, current_y, 30, 100, text_center, 'planets_smallcaps_par_style')
+        h_r = _draw_frame(82, current_y, 49, 100, text_right, 'planets_left_par_style')
+
+        # Aggiornamento Y per il prossimo giro
+        current_y += max(h_l, h_c, h_r) + y_gap
+    
+
+# def drawSecondPage(data, language):
+#     def _date_str(stringa_data):
+#         try:
+#             dt = datetime.datetime.strptime(stringa_data, '%Y-%m-%d %H:%M:%S.%f')
+#         except ValueError:
+#             dt = datetime.datetime.strptime(stringa_data, '%Y-%m-%d')
+#         return (
+#             dt.strftime('%Y'), 
+#             dt.strftime('%m'), 
+#             dt.strftime('%d'), 
+#             dt.strftime('%H'), 
+#             dt.strftime('%M'), 
+#             dt.strftime('%S')
+#         )
+
+#     months = ['January', 'February', 'March', 'April',
+#               'May', 'June', 'July', 'August',
+#               'September', 'October', 'November', 'December']
+#     t = translator(language)
+#     y_gap = 2
+#     planets = extract_planetary_events(data)
+
+#     #--temp / debug
+#     planets_filename = generate_filename(prefix='planets_', ext='.py')
+#     save_to_file(planets, planets_filename)
+#     #--remove before release--/
+
+#     # --- PASQUA ED EQUINOZI ---
+#     # frame sinistra
+#     seasons_left_text = (
+#         f"{t('easter')}\n"
+#         f"{t('eq_spring')}\n"
+#         f"{t('eq_summer')}\n"
+#         f"{t('eq_autumn')}\n"
+#         f"{t('eq_winter')}"
+#     )
+#     season_left_frame = scribus.createText(10, 10, 40, 100)
+#     scribus.setText(seasons_left_text, season_left_frame)
+#     scribus.setParagraphStyle('planets_bold_par_style', season_left_frame)
+#     season_left_frame_height = resize_height(season_left_frame)
+#     season_left_frame_width = resize_width(season_left_frame)
+#     # frame destra
+#     seasons_right_text = ""
+#     for item in planets.keys():
+#         if item == "easter":
+#             _, month, day, _, _, _ = _date_str(planets["easter"])
+#             seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
+#         elif item == 'seasons':
+#             for season in planets["seasons"]:
+#                 _, month, day, _, _, _ = _date_str(season["date"])
+#                 seasons_right_text += f"{day} {t(months[int(month) - 1])}\n"
+#     if seasons_right_text.endswith("\n"):
+#         seasons_right_text = seasons_right_text[:-1]
+    
+#     season_right_frame = scribus.createText(82, 10, 49, 120)
+#     scribus.setText(seasons_right_text, season_right_frame)
+#     scribus.setParagraphStyle('planets_left_par_style', season_right_frame)
+#     season_right_frame_height = resize_height(season_right_frame)
+#     last_max_y = max([season_right_frame_height, season_left_frame_height])
+
+#     # --- MERCURIO ---
+#     if planets["mercury"]:
+#         mercury_frame_y = 10 + y_gap + last_max_y
+#         # frame sinistra
+#         mercury_left_text = f"{t("mercury")}"
+#         mercury_left_frame = scribus.createText(10, mercury_frame_y, 40, 100)
+#         scribus.setText(mercury_left_text, mercury_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', mercury_left_frame)
+#         mercury_left_frame_height = resize_height(mercury_left_frame)
+#         # frame centro
+#         mercury_center_text = ""
+#         for item in planets["mercury"]:
+#             mercury_center_text += f"{item["event"].lower().replace("_", " ")}"
+#             if item.get("degree"):
+#                 mercury_center_text += f" {item["degree"]:.1f}°\n"
+#             else:
+#                 mercury_center_text += "\n"
+#         if mercury_center_text.endswith("\n"):
+#             mercury_center_text = mercury_center_text[:-1]
+#         mercury_center_frame = scribus.createText(51, mercury_frame_y, 30, 100)
+#         scribus.setText(mercury_center_text, mercury_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', mercury_center_frame)
+#         mercury_center_frame_height = resize_height(mercury_center_frame)
+#         # frame destra
+#         mercury_right_text = ""
+#         for item in planets["mercury"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
+#             mercury_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if mercury_right_text.endswith("\n"):
+#             mercury_right_text = mercury_right_text[:-1]
+#         mercury_right_frame = scribus.createText(82, mercury_frame_y, 49, 100)
+#         scribus.setText(mercury_right_text, mercury_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', mercury_right_frame)
+#         mercury_right_frame_height = resize_height(mercury_right_frame)
+#         last_max_y = mercury_frame_y + max([mercury_left_frame_height, mercury_center_frame_height, mercury_right_frame_height])
+
+#     # --- VENERE ---
+#     if planets["venus"]:
+#         venus_frame_y =  y_gap + last_max_y
+#         # frame sinistra
+#         venus_left_text = f"{t("venus")}"
+#         venus_left_frame = scribus.createText(10, venus_frame_y, 40, 100)
+#         scribus.setText(venus_left_text, venus_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', venus_left_frame)
+#         venus_left_frame_height = resize_height(venus_left_frame)
+#         # frame centro
+#         venus_center_text = ""
+#         for item in planets["venus"]:
+#             venus_center_text += f"{item["event"].lower().replace("_", " ")}"
+#             if item.get("degree"):
+#                 venus_center_text += f" {item["degree"]:.1f}°\n"
+#             else:
+#                 venus_center_text += "\n"
+#         if venus_center_text.endswith("\n"):
+#             venus_center_text = venus_center_text[:-1]
+#         venus_center_frame = scribus.createText(51, venus_frame_y, 30, 100)
+#         scribus.setText(venus_center_text, venus_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', venus_center_frame)
+#         venus_center_frame_height = resize_height(venus_center_frame)
+#         # frame destra
+#         venus_right_text = ""
+#         for item in planets["venus"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
+#             venus_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if venus_right_text.endswith("\n"):
+#             venus_right_text = venus_right_text[:-1]
+#         venus_right_frame = scribus.createText(82, venus_frame_y, 49, 100)
+#         scribus.setText(venus_right_text, venus_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', venus_right_frame)
+#         venus_right_frame_height = resize_height(venus_right_frame)
+#         last_max_y = venus_frame_y + max([venus_left_frame_height, venus_center_frame_height, venus_right_frame_height])
+
+#     # --- LUNA ---
+#     if planets["moon"]:
+#         moon_frame_y = y_gap + last_max_y
+#         # frame sinistra
+#         moon_left_text = f"{t("moon")}"
+#         moon_left_frame = scribus.createText(10, moon_frame_y, 40, 100)
+#         scribus.setText(moon_left_text, moon_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', moon_left_frame)
+#         moon_left_frame_height = resize_height(moon_left_frame)
+#         # frame centro
+#         moon_center_text = ""
+#         for item in planets["moon"]:
+#             moon_center_text += f"{item["event"].lower().replace("_", " ")} {["C", "B", "A"][int(item["type"])]}\n"
+#         if moon_center_text.endswith("\n"):
+#             moon_center_text = moon_center_text[:-1]
+#         moon_center_frame = scribus.createText(51, moon_frame_y, 30, 100)
+#         scribus.setText(moon_center_text, moon_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', moon_center_frame)
+#         moon_center_frame_height = resize_height(moon_center_frame)
+#         # frame destra
+#         moon_right_text = ""
+#         for item in planets["moon"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"])
+#             moon_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if moon_right_text.endswith("\n"):
+#             moon_right_text = moon_right_text[:-1]
+#         moon_right_frame = scribus.createText(82, moon_frame_y, 49, 100)
+#         scribus.setText(moon_right_text, moon_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', moon_right_frame)
+#         moon_right_frame_height = resize_height(moon_right_frame)
+#         last_max_y = moon_frame_y + max([moon_left_frame_height, moon_center_frame_height, moon_right_frame_height])
+
+#     # --- MARTE ---
+#     if planets["mars"]:
+#         mars_frame_y = y_gap + last_max_y
+#         # frame sinistra
+#         mars_left_text = f"{t("mars")}"
+#         mars_left_frame = scribus.createText(10, mars_frame_y, 40, 100)
+#         scribus.setText(mars_left_text, mars_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', mars_left_frame)
+#         mars_left_frame_height = resize_height(mars_left_frame)
+#         # frame centro
+#         mars_center_text = ""
+#         for item in planets["mars"]:
+#             mars_center_text += f"{item["event"].lower().replace("_", " ")}\n"
+#         if mars_center_text.endswith("\n"):
+#             mars_center_text = mars_center_text[:-1]
+#         mars_center_frame = scribus.createText(51, mars_frame_y, 30, 100)
+#         scribus.setText(mars_center_text, mars_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', mars_center_frame)
+#         mars_center_frame_height = resize_height(mars_center_frame)
+#         # frame destra
+#         mars_right_text = ""
+#         for item in planets["mars"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
+#             mars_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if mars_right_text.endswith("\n"):
+#             mars_right_text = mars_right_text[:-1]
+#         mars_right_frame = scribus.createText(82, mars_frame_y, 49, 100)
+#         scribus.setText(mars_right_text, mars_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', mars_right_frame)
+#         mars_right_frame_height = resize_height(mars_right_frame)
+#         last_max_y = mars_frame_y + max([mars_left_frame_height, mars_center_frame_height, mars_right_frame_height])
+
+#     # --- GIOVE ---
+#     if planets["jupiter"]:
+#         jupiter_frame_y = y_gap + last_max_y
+#         # frame sinistra
+#         jupiter_left_text = f"{t("jupiter")}"
+#         jupiter_left_frame = scribus.createText(10, jupiter_frame_y, 40, 100)
+#         scribus.setText(jupiter_left_text, jupiter_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', jupiter_left_frame)
+#         jupiter_left_frame_height = resize_height(jupiter_left_frame)
+#         # frame centro
+#         jupiter_center_text = ""
+#         for item in planets["jupiter"]:
+#             jupiter_center_text += f"{item["event"].lower().replace("_", " ")}\n"
+#         if jupiter_center_text.endswith("\n"):
+#             jupiter_center_text = jupiter_center_text[:-1]
+#         jupiter_center_frame = scribus.createText(51, jupiter_frame_y, 30, 100)
+#         scribus.setText(jupiter_center_text, jupiter_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', jupiter_center_frame)
+#         jupiter_center_frame_height = resize_height(jupiter_center_frame)
+#         # frame destra
+#         jupiter_right_text = ""
+#         for item in planets["jupiter"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
+#             jupiter_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if jupiter_right_text.endswith("\n"):
+#             jupiter_right_text = jupiter_right_text[:-1]
+#         jupiter_right_frame = scribus.createText(82, jupiter_frame_y, 49, 100)
+#         scribus.setText(jupiter_right_text, jupiter_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', jupiter_right_frame)
+#         jupiter_right_frame_height = resize_height(jupiter_right_frame)
+#         last_max_y = jupiter_frame_y + max([jupiter_left_frame_height, jupiter_center_frame_height, jupiter_right_frame_height])
+
+#     # --- SATURNO ---
+#     if planets["saturn"]:
+#         saturn_frame_y = y_gap + last_max_y
+#         # frame sinistra
+#         saturn_left_text = f"{t("saturn")}"
+#         saturn_left_frame = scribus.createText(10, saturn_frame_y, 40, 100)
+#         scribus.setText(saturn_left_text, saturn_left_frame)
+#         scribus.setParagraphStyle('planets_bold_par_style', saturn_left_frame)
+#         saturn_left_frame_height = resize_height(saturn_left_frame)
+#         # frame centro
+#         saturn_center_text = ""
+#         for item in planets["saturn"]:
+#             saturn_center_text += f"{item["event"].lower().replace("_", " ")}\n"
+#         if saturn_center_text.endswith("\n"):
+#             saturn_center_text = saturn_center_text[:-1]
+#         saturn_center_frame = scribus.createText(51, saturn_frame_y, 30, 100)
+#         scribus.setText(saturn_center_text, saturn_center_frame)
+#         scribus.setParagraphStyle('planets_smallcaps_par_style', saturn_center_frame)
+#         saturn_center_frame_height = resize_height(saturn_center_frame)
+#         # frame destra
+#         saturn_right_text = ""
+#         for item in planets["saturn"]:
+#             _, month, day, hour, minute, _ = _date_str(item["date"].strftime("%Y-%m-%d %H:%M:%S.%f"))
+#             saturn_right_text += f"{day} {t(months[int(month) - 1])} h{hour}:{minute}\n"
+#         if saturn_right_text.endswith("\n"):
+#             saturn_right_text = saturn_right_text[:-1]
+#         saturn_right_frame = scribus.createText(82, saturn_frame_y, 49, 100)
+#         scribus.setText(saturn_right_text, saturn_right_frame)
+#         scribus.setParagraphStyle('planets_left_par_style', saturn_right_frame)
+#         saturn_right_frame_height = resize_height(saturn_right_frame)
+#         last_max_y = saturn_frame_y + max([saturn_left_frame_height, saturn_center_frame_height, saturn_right_frame_height])
 
 
 def create_planner_A5(data, language):
@@ -756,7 +882,7 @@ def create_planner_A5(data, language):
     Iterates through chunks of days, creates new pages in Scribus,
     and handles progress bars.
     """
-    #--temp
+    #--temp / debug
     logger = Logger()
     logger.log('start')
     #--remove before release--/
@@ -786,7 +912,7 @@ def create_planner_A5(data, language):
     #         scribus.newPage(-1)
     #         pagesQty = scribus.pageCount()
     #         # scribus.progressSet(pagesQty if pagesQty <= total_pages else total_pages)
-    #         #--temp
+    #         #--temp / debug
     #         logger.log(f"starting page {current_page}")
     #         logger.logmem()
     #         #--remove before release--/
@@ -809,7 +935,7 @@ def create_planner_A5(data, language):
     if scribus.haveDoc():
         scribus.saveDoc()
     
-    #--temp
+    #--temp / debug
     logger.log("END")
     logger.logmem()
     #--remove before release--/
