@@ -20,7 +20,7 @@ GOLDEN_RATIO = 1.61803
 # List of available language keys imported from the localization data
 languages_list = sorted(list(languages.keys()))
 
-t_ui = translator(by_acronym(getGuiLanguage()))
+ui_t = translator(by_acronym(getGuiLanguage()))
 
 
 def get_planner_edition():
@@ -50,7 +50,7 @@ def get_planner_edition():
 
     # Main window initialization
     root = tk.Tk()
-    root.title(t_ui("mainform_title"))
+    root.title(ui_t("mainform_title"))
     root.resizable(False, False)
 
     # Main container frame with padding
@@ -62,7 +62,7 @@ def get_planner_edition():
     years = list(range(current_year - 25, current_year + 26))
 
     # Year Label and Combobox
-    ttk.Label(main_frame, text=f"{t_ui('mainform_year')}:").grid(
+    ttk.Label(main_frame, text=f"{ui_t('mainform_year')}:").grid(
         row=0, column=0, sticky=tk.W, pady=5
     )
     year_var = tk.StringVar(value=str(current_year))
@@ -76,7 +76,7 @@ def get_planner_edition():
     year_combo.grid(row=0, column=1, pady=5, padx=(10, 0))
 
     # Language Label and Combobox
-    ttk.Label(main_frame, text=f"{t_ui('mainform_language')}:").grid(
+    ttk.Label(main_frame, text=f"{ui_t('mainform_language')}:").grid(
         row=1, column=0, sticky=tk.W, pady=5
     )
     language_var = tk.StringVar(value="English")
@@ -99,12 +99,12 @@ def get_planner_edition():
 
     # OK and Cancel buttons
     ok_button = ttk.Button(
-        button_frame, text=f"{t_ui('btn_ok')}", command=on_ok, width=10
+        button_frame, text=f"{ui_t('btn_ok')}", command=on_ok, width=10
     )
     ok_button.grid(row=0, column=0, padx=5)
 
     cancel_button = ttk.Button(
-        button_frame, text=f"{t_ui('btn_cancel')}", command=on_cancel, width=10
+        button_frame, text=f"{ui_t('btn_cancel')}", command=on_cancel, width=10
     )
     cancel_button.grid(row=0, column=1, padx=5)
 

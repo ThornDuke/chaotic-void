@@ -61,9 +61,6 @@ __date__ = "2026-02-11"
 
 import sys
 import datetime
-#--temp / debug
-# import cProfile
-#--remove before release--/
 
 try:
     import scribus  # pyright: ignore[reportMissingImports]
@@ -116,21 +113,7 @@ def main() -> None:
         if scribus.haveDoc():
             scribus.setRedraw(True)
         scribus.statusMessage("")
-        #--temp / debug
-        # scribus.progressReset()
-        #--remove before release--/
 
 
 if __name__ == "__main__":
-    #--temp / debug
-    # profiler = cProfile.Profile()
-    # profiler.enable()  # Inizia a registrare
-    #--remove before release--/
-
     main()
-    
-    #--temp / debug
-    # profiler.disable() # Ferma la registrazione
-    # report_filename = f"report_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.prof"
-    # profiler.dump_stats(report_filename)
-    #--remove before release--/

@@ -15,8 +15,10 @@ from .data.lines import get_A5_line_data
 from .translator import translator, by_acronym
 from .utilities import template_replace, round_dt_to_min, generate_filename, save_to_file
 #--temp / debug
-from src.archivist import Logger
+# from src.archivist import Logger
 #--remove before release--/
+
+ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 def hour_min(dt):
     """
@@ -552,8 +554,8 @@ def drawSecondPage(data, language):
     planets = extract_planetary_events(data)
     
     #--temp / debug
-    planets_filename = generate_filename(prefix='planets_', ext='.py')
-    save_to_file(planets, planets_filename)
+    # planets_filename = generate_filename(prefix='planets_', ext='.py')
+    # save_to_file(planets, planets_filename)
     #--remove before release--/ 
     
     current_y = 10
@@ -622,11 +624,10 @@ def create_planner_A5(data, language):
     and handles progress bars.
     """
     #--temp / debug
-    logger = Logger()
-    logger.log('start')
+    # logger = Logger()
+    # logger.log('start')
     #--remove before release--/
     filename = generate_filename(prefix='AG_', ext='.sla')
-    ui_t = translator(by_acronym(scribus.getGuiLanguage()))
     page_data_list = split_list(data)
     total_pages = len(page_data_list) + 2
 
@@ -652,8 +653,8 @@ def create_planner_A5(data, language):
             pagesQty = scribus.pageCount()
             # scribus.progressSet(pagesQty if pagesQty <= total_pages else total_pages)
             #--temp / debug
-            logger.log(f"starting page {current_page}")
-            logger.logmem()
+            # logger.log(f"starting page {current_page}")
+            # logger.logmem()
             #--remove before release--/
             msg = template_replace(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
             scribus.statusMessage(msg)
@@ -664,8 +665,8 @@ def create_planner_A5(data, language):
                 draw_page('left', item)
             else:
                 scribus.messageBox(
-                    "Planner Generator",
-                    f"Error: unknown page type for page {current_page}.",
+                    ui_t("mainform_title"),
+                    template_replace(ui_t("err_unknown_page_type"), current_page=current_page),
                     scribus.ICON_CRITICAL,
                 )
                 sys.exit(1)
@@ -675,6 +676,6 @@ def create_planner_A5(data, language):
         scribus.saveDoc()
     
     #--temp / debug
-    logger.log("END")
-    logger.logmem()
+    # logger.log("END")
+    # logger.logmem()
     #--remove before release--/

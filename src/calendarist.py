@@ -501,8 +501,8 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     )
 
     #--temp / debug
-    calendar_filename = generate_filename(prefix='calendar_', ext='.py')
-    save_to_file(full_calendar, calendar_filename)
+    # calendar_filename = generate_filename(prefix='calendar_', ext='.py')
+    # save_to_file(full_calendar, calendar_filename)
     #--remove before release--/
 
     scribus.progressReset()

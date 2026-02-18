@@ -106,6 +106,7 @@ languages = {
         'legend_moonphases': 'Fasi della Luna. Ora della fase.',
         'legend_mooneclipses': 'Eclissi di luna. A = totale B = parziale C = penombra. Ora dell’eclissi.',
         'legend_explanation': 'Per ogni pianeta sono indicati gli orari del sorgere, della culminazione e del tramonto.\nGli orari sono calcolati per la città di {{city}}.',
+        "err_unknown_page_type": "Errore: tipo di pagina sconosciuto per la pagina {{current_page}}.",
     },
     "Afrikaans": {
         "acronym": "af",
@@ -217,6 +218,7 @@ languages = {
         'legend_moonphases': 'Fases van die maan. Tyd van die fase.',
         'legend_mooneclipses': 'Maansverduisterings. A = totaal B = gedeeltelik C = penumbra. Tyd van die verduistering.',
         'legend_explanation': 'Vir elke planeet word die tye van opkoms, kulminasie en ondergang aangedui.\nTye word bereken vir die stad {{city}}.',
+        "err_unknown_page_type": "Fout: onbekende bladsytipe vir bladsy {{current_page}}.",
     },
     "Catalan": {
         "acronym": "ca",
@@ -324,6 +326,7 @@ languages = {
         'legend_moonphases': 'Fases de la Lluna. Hora de la fase.',
         'legend_mooneclipses': 'Eclipsis de lluna. A = total B = parcial C = penombra. Hora de l’eclipsi.',
         'legend_explanation': 'Per a cada planeta s’indiquen els horaris de sortida, culminació i posta.\nEls horaris estan calculats per a la ciutat de {{city}}.',
+        "err_unknown_page_type": "Error: tipus di pàgina desconegut per a la pàgina {{current_page}}.",
     },
     "Croatian": {
         "acronym": "hr",
@@ -435,6 +438,7 @@ languages = {
         'legend_moonphases': 'Mjesečeve mijene. Vrijeme mijene.',
         'legend_mooneclipses': 'Pomrčine Mjeseca. A = potpuna B = djelomična C = polusjena. Vrijeme pomrčine.',
         'legend_explanation': 'Za svaki planet navedena su vremena izlaska, kulminacije i zalaska.\nVremena su izračunata za grad {{city}}.',
+        "err_unknown_page_type": "Pogreška: nepoznata vrsta stranice za stranicu {{current_page}}.",
     },
     "Czech": {
         "acronym": "cs",
@@ -542,6 +546,7 @@ languages = {
         'legend_moonphases': 'Fáze Měsíce. Čas fáze.',
         'legend_mooneclipses': 'Zatmění Měsíce. A = úplné B = částečné C = polostínové. Čas zatmění.',
         'legend_explanation': 'U každé planety jsou uvedeny časy východu, kulminace a západu.\nČasy jsou vypočítány pro město {{city}}.',
+        "err_unknown_page_type": "Chyba: neznámý typ stránky pro stránku {{current_page}}.",
     },
     "Dutch": {
         "acronym": "nl",
@@ -653,6 +658,7 @@ languages = {
         'legend_moonphases': 'Maanfasen. Tijd van de fase.',
         'legend_mooneclipses': 'Maansverduisteringen. A = totaal B = gedeeltelijk C = bijschaduw. Tijd van de eclips.',
         'legend_explanation': 'Voor elke planeet worden de tijden van opkomst, culminatie en ondergang aangegeven.\nTijden zijn berekend voor de stad {{city}}.',
+        "err_unknown_page_type": "Fout: onbekend paginatype voor pagina {{current_page}}.",
     },
     "English": {
         "acronym": "en",
@@ -764,6 +770,7 @@ languages = {
         'legend_moonphases': 'Moon phases. Phase time.',
         'legend_mooneclipses': 'Moon eclipses. A = total B = partial C = penumbral. Eclipse time.',
         'legend_explanation': 'For each planet, rising, culmination, and setting times are indicated.\nTimes are calculated for the city of {{city}}.',
+        "err_unknown_page_type": "Error: unknown page type for page {{current_page}}.",
     },
     "Finnish": {
         "acronym": "fi",
@@ -875,6 +882,7 @@ languages = {
         'legend_moonphases': 'Kuun vaiheet. Vaiheen aika.',
         'legend_mooneclipses': 'Kuunpimennykset. A = täydellinen B = osittainen C = puolivarjo. Pimennyksen aika.',
         'legend_explanation': 'Jokaiselle planeetalle ilmoitetaan nousu-, huipennus- ja laskuajat.\nAjanhetket on laskettu kaupungille {{city}}.',
+        "err_unknown_page_type": "Virhe: tuntematon sivutyyppi sivulle {{current_page}}.",
     },
     "French": {
         "acronym": "fr",
@@ -986,6 +994,7 @@ languages = {
         'legend_moonphases': 'Phases de la lune. Heure de la phase.',
         'legend_mooneclipses': 'Éclipses de lune. A = totale B = partielle C = pénombre. Heure de l’éclipse.',
         'legend_explanation': 'Pour chaque planète, les heures de lever, de culmination et de coucher sont indiquées.\nLes horaires sont calculés pour la ville de {{city}}.',
+        "err_unknown_page_type": "Erreur : type de page inconnu per la page {{current_page}}.",
     },
     "German": {
         "acronym": "de",
@@ -1097,6 +1106,7 @@ languages = {
         'legend_moonphases': 'Mondphasen. Zeit der Phase.',
         'legend_mooneclipses': 'Mondfinsternisse. A = total B = partiell C = Halbschatten. Zeit der Finsternis.',
         'legend_explanation': 'Für jeden Planeten sind die Zeiten für Aufgang, Kulmination und Untergang angegeben.\nDie Zeiten sind für die Stadt {{city}} berechnet.',
+        "err_unknown_page_type": "Fehler: unbekannter Seitentyp für Seite {{current_page}}.",
     },
     "Hungarian": {
         "acronym": "hu",
@@ -1208,6 +1218,7 @@ languages = {
         'legend_moonphases': 'Holdfázisok. Fázis ideje.',
         'legend_mooneclipses': 'Holdfogyatkozások. A = teljes B = részleges C = félárnyékos. Fogyatkozás ideje.',
         'legend_explanation': 'Minden bolygónál fel van tüntetve a kelés, a delelés és a nyugvás időpontja.\nAz időpontok {{city}} városára vannak kiszámítva.',
+        "err_unknown_page_type": "Hiba: ismeretlen oldaltípus a(z) {{current_page}} oldalhoz.",
     },
     "Norwegian": {
         "acronym": "no",
@@ -1314,6 +1325,7 @@ languages = {
         'legend_moonphases': 'Månefaser. Tid for fasen.',
         'legend_mooneclipses': 'Måneformørkelser. A = total B = delvis C = halvskygge. Tid for formørkelsen.',
         'legend_explanation': 'For hver planet er tider for oppgang, kulminasjon og nedgang angitt.\nTidene er beregnet for byen {{city}}.',
+        "err_unknown_page_type": "Feil: ukjent sidetype for siden {{current_page}}.",
     },
     "Polish": {
         "acronym": "pl",
@@ -1425,6 +1437,7 @@ languages = {
         'legend_moonphases': 'Fazy Księżyca. Czas fazy.',
         'legend_mooneclipses': 'Zaćmienia Księżyca. A = całkowite B = częściowe C = półcieniowe. Czas zaćmienia.',
         'legend_explanation': 'Dla każdej planety podano godziny wschodu, górowania i zachodu.\nGodziny są obliczone dla miasta {{city}}.',
+        "err_unknown_page_type": "Błąd: nieznany typ strony dla strony {{current_page}}.",
     },
     "Portuguese": {
         "acronym": "pt",
@@ -1532,6 +1545,7 @@ languages = {
         'legend_moonphases': 'Fases da Lua. Hora da fase.',
         'legend_mooneclipses': 'Eclipses lunares. A = total B = parcial C = penumbra. Hora do eclipse.',
         'legend_explanation': 'Para cada planeta são indicados os horários de nascer, culminação e ocaso.\nOs horários são calculados para a cidade de {{city}}.',
+        "err_unknown_page_type": "Erro: tipo de página desconhecido para a página {{current_page}}.",
     },
     "Romanian": {
         "acronym": "ro",
@@ -1639,6 +1653,7 @@ languages = {
         'legend_moonphases': 'Fazele Lunii. Ora fazei.',
         'legend_mooneclipses': 'Eclipse de lună. A = totală B = parțială C = penumbră. Ora eclipsei.',
         'legend_explanation': 'Pentru fiecare planetă sunt indicate orele de răsărit, culminație și apus.\nOrele sunt calculate pentru orașul {{city}}.',
+        "err_unknown_page_type": "Eroare: tip de pagină necunoscut pentru pagina {{current_page}}.",
     },
     "Russian": {
         "acronym": "ru",
@@ -1750,6 +1765,7 @@ languages = {
         'legend_moonphases': 'Фазы Луны. Время фазы.',
         'legend_mooneclipses': 'Лунное затмение. А = полное Б = частичное В = полутеневое. Время затмения.',
         'legend_explanation': 'Для каждой планеты указано время восхода, кульминации и захода.\nВремя рассчитано для города {{city}}.',
+        "err_unknown_page_type": "Ошибка: неизвестный тип страницы для страницы {{current_page}}.",
     },
     "Slovak": {
         "acronym": "sk",
@@ -1861,6 +1877,7 @@ languages = {
         'legend_moonphases': 'Fázy Mesiaca. Čas fázy.',
         'legend_mooneclipses': 'Zatmenia Mesiaca. A = úplné B = čiastočné C = polotieňové. Čas zatmenia.',
         'legend_explanation': 'Pre každú planétu sú uvedené časy východu, kulminácie a západu.\nČasy sú vypočítané pre mesto {{city}}.',
+        "err_unknown_page_type": "Chyba: neznámy typ stránky pre stránku {{current_page}}.",
     },
     "Spanish": {
         "acronym": "es",
@@ -1968,6 +1985,7 @@ languages = {
         'legend_moonphases': 'Fases de la Luna. Hora de la fase.',
         'legend_mooneclipses': 'Eclipses de luna. A = total B = parcial C = penumbra. Hora del eclipse.',
         'legend_explanation': 'Para cada planeta se indican los horarios de salida, culminación y puesta.\nLos horarios están calculados para la ciudad de {{city}}.',
+        "err_unknown_page_type": "Error: tipo de página desconocido para la página {{current_page}}.",
     },
     "Swahili": {
         "acronym": "sw",
@@ -2079,6 +2097,7 @@ languages = {
         'legend_moonphases': 'Awamu za mwezi. Muda wa awamu.',
         'legend_mooneclipses': 'Kupatwa kwa mwezi. A = kamili B = kiasi C = penumbra. Muda wa kupatwa.',
         'legend_explanation': 'Kwa kila sayari, nyakati za kuchomoza, kilele, na kuzama zimeonyeshwa.\nNyakati zimekokotolewa kwa mji wa {{city}}.',
+        "err_unknown_page_type": "Hitilafu: aina ya ukurasa haijulikani kwa ukurasa {{current_page}}.",
     },
     "Swedish": {
         "acronym": "sv",
@@ -2189,6 +2208,7 @@ languages = {
         "planner_page_elaborating": "Kalender: bearbetar sida {{pagesQty}} av {{total_pages}}",
         'legend_moonphases': 'Månfaser. Tid för fasen.',
         'legend_mooneclipses': 'Månförmörkelser. A = total B = partiell C = halvskugga. Tid för förmörkelsen.',
-        'legend_explanation': 'För varje planet anges tider för uppgång, kulmination och nedgång.\nTiderna är beräknade för staden {{city}}.'
+        'legend_explanation': 'För varje planet anges tider för uppgång, kulmination och nedgång.\nTiderna är beräknade för staden {{city}}.',
+        "err_unknown_page_type": "Fel: okänd sidtyp för sidan {{current_page}}.",
     },
 }

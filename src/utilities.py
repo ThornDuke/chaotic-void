@@ -7,7 +7,7 @@ import importlib.metadata
 import scribus  # pyright: ignore[reportMissingImports]
 from .translator import by_acronym, translator
 
-t_ui = translator(by_acronym(scribus.getGuiLanguage()))
+ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
 def template_replace(template, **replacements):
@@ -96,7 +96,7 @@ def check_requirements():
         try:
             from packaging.version import parse as parse_version # pyright: ignore[reportMissingImports]
         except ImportError:
-            return {"available": False, "error": t_ui("checkform_lib_err")}
+            return {"available": False, "error": ui_t("checkform_lib_err")}
 
         try:
             curr_ver = importlib.metadata.version(lib_name)
@@ -212,7 +212,7 @@ def validate_requirements(report):
         req = ".".join(map(str, report["scribus"]["req_ver"]))
         curr = ".".join(map(str, report["scribus"]["curr_ver"]))
         missing_items.append(
-            template_replace(t_ui("checkform_scribus"), curr_ver=curr, req_ver=req)
+            template_replace(ui_t("checkform_scribus"), curr_ver=curr, req_ver=req)
         )
 
     # 2. Check Python
@@ -222,17 +222,17 @@ def validate_requirements(report):
         v = report["python"]["curr_ver"]
         curr = f"{v.major}.{v.minor}.{v.micro}"
         missing_items.append(
-            template_replace(t_ui("checkform_python"), curr_ver=curr, req_ver=req)
+            template_replace(ui_t("checkform_python"), curr_ver=curr, req_ver=req)
         )
 
     # 3. Check Tkinter
     tk_rep = report["tkinter"]
     if not tk_rep["available"]:
-        missing_items.append(t_ui("chekform_tk"))
+        missing_items.append(ui_t("chekform_tk"))
     elif not tk_rep["is_enough"]:
         missing_items.append(
             template_replace(
-                t_ui("checkform_tk_ver"),
+                ui_t("checkform_tk_ver"),
                 curr_ver=tk_rep["curr_ver"],
                 req_ver=tk_rep["req_ver"],
             )
@@ -252,11 +252,11 @@ def validate_requirements(report):
             )
 
         elif not lib_rep["available"]:
-            missing_items.append(template_replace(t_ui("checkform_lib"), library=lib))
+            missing_items.append(template_replace(ui_t("checkform_lib"), library=lib))
         elif not lib_rep["is_enough"]:
             missing_items.append(
                 template_replace(
-                    t_ui("checkform_lib_ver"),
+                    ui_t("checkform_lib_ver"),
                     library=lib,
                     curr_ver=lib_rep["curr_ver"],
                     req_ver=lib_rep["req_ver"],
@@ -269,17 +269,17 @@ def validate_requirements(report):
         for font_name, exists in font_entry.items():
             if not exists:
                 missing_items.append(
-                    template_replace(t_ui("checkform_font"), font_name=font_name)
+                    template_replace(ui_t("checkform_font"), font_name=font_name)
                 )
 
     # Final Decision
     if missing_items:
-        error_msg = f"{t_ui('checkform_msg_warn')}\n\n"
+        error_msg = f"{ui_t('checkform_msg_warn')}\n\n"
         error_msg += "\n".join(missing_items)
-        error_msg += f"\n\n{t_ui('checkform_msg_tip')}"
+        error_msg += f"\n\n{ui_t('checkform_msg_tip')}"
 
         scribus.messageBox(
-            f"{t_ui('checkform_title')}", error_msg, scribus.ICON_CRITICAL
+            f"{ui_t('checkform_title')}", error_msg, scribus.ICON_CRITICAL
         )
         return False
 
