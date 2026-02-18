@@ -17,8 +17,8 @@ from .utilities import generate_filename, save_to_file
 def generate_dates(anno: int) -> list[dict]:
     """
     Generates a list of dictionaries containing information for each day of the
-    specified year, extending the range to start from the preceding Monday
-    and end with the following Sunday to complete the weeks.
+    specified year, extending the range to start from the preceding Thursday
+    and end with the following Wednesday to complete the weeks.
 
     Args:
       anno (int): The year for which to generate the list.
@@ -31,12 +31,13 @@ def generate_dates(anno: int) -> list[dict]:
     primo_gennaio = datetime.date(anno, 1, 1)
     ultimo_dicembre = datetime.date(anno, 12, 31)
 
-    # Find the first Monday on or before January 1st
-    giorni_prima = primo_gennaio.weekday()  # Monday=0, Sunday=6
+    # Find the first Thursday on or before January 1st
+    giorni_prima = primo_gennaio.weekday() - 3 # Monday=0, Sunday=6
     data_inizio = primo_gennaio - datetime.timedelta(days=giorni_prima)
 
-    # Find the first Sunday on or after December 31st
-    giorni_dopo = 6 - ultimo_dicembre.weekday()
+    # Find the first Wednesday on or after December 31st
+    shift = abs(ultimo_dicembre.weekday() - 6) + 3
+    giorni_dopo = shift if shift < 7 else shift - 7
     data_fine = ultimo_dicembre + datetime.timedelta(days=giorni_dopo)
 
     # Populate the date list
