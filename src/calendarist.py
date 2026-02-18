@@ -9,7 +9,7 @@ with holidays and religious dates.
 import datetime
 import scribus  # pyright: ignore[reportMissingImports]
 from . import astronomer
-from .data.localization import translator, by_acronym
+from .translator import translator, by_acronym
 from .data.holidays import holidays
 from .utilities import generate_filename, save_to_file
 

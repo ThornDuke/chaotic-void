@@ -14,7 +14,7 @@ from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
 import ephem
-from .data.localization import translator
+from .translator import translator
 
 JPL_EPHEMERIS_FILE = "de440s.bsp"
 

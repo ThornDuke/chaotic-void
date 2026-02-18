@@ -5,7 +5,7 @@ import sys
 import pprint
 import importlib.metadata
 import scribus  # pyright: ignore[reportMissingImports]
-from .data.localization import by_acronym, translator
+from .translator import by_acronym, translator
 
 t_ui = translator(by_acronym(scribus.getGuiLanguage()))
 

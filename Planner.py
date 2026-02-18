@@ -79,7 +79,7 @@ except ImportError:
 import src.mainform as mainform
 import src.calendarist as calendarist
 import src.designer as designer
-from src.data.localization import translator, by_acronym
+from src.translator import translator, by_acronym
 from src.utilities import template_replace, check_requirements, validate_requirements
 
 # Inizializzazione traduttore

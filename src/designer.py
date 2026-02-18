@@ -12,7 +12,7 @@ import datetime
 import re
 import scribus  # pyright: ignore[reportMissingImports]
 from .data.lines import get_A5_line_data
-from .data.localization import translator, by_acronym
+from .translator import translator, by_acronym
 from .utilities import template_replace, round_dt_to_min, generate_filename, save_to_file
 #--temp / debug
 from src.archivist import Logger
@@ -524,14 +524,12 @@ def drawSecondPage(data, language):
             dt.strftime('%H'), dt.strftime('%M'), dt.strftime('%S')
         )
 
-    def _draw_frame(x, y, w, h, text, style, resizew=False):
+    def _draw_frame(x, y, w, h, text, style):
         """Crea un frame Scribus, imposta testo e stile, ridimensiona e restituisce l'altezza."""
         if not text: return 0
         frame = scribus.createText(x, y, w, h)
         scribus.setText(text, frame)
         scribus.setParagraphStyle(style, frame)
-        if resizew:
-            resize_width(frame)
         return resize_height(frame) # Assumo che questa funzione esista nel contesto globale
 
     def _format_event_line(item, p_key):
@@ -575,7 +573,7 @@ def drawSecondPage(data, language):
             _, m, d, _, _, _ = _get_date_parts(season["date"])
             right_lines.append(f"{d} {t(months[int(m) - 1])}")
 
-    h_left = _draw_frame(10, current_y, 40, 100, left_text, 'planets_bold_par_style', resizew=True)
+    h_left = _draw_frame(10, current_y, 50, 100, left_text, 'planets_bold_par_style')
     h_right = _draw_frame(82, current_y, 49, 120, "\n".join(right_lines), 'planets_left_par_style')
     
     current_y += max(h_left, h_right) + y_gap

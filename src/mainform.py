@@ -9,7 +9,8 @@ from scribus import getGuiLanguage  # pyright: ignore[reportMissingImports]
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
-from .data.localization import languages, by_acronym, translator
+from .translator import translator, by_acronym
+from .data.localization import languages
 
 # --- Global Variables ---
 
