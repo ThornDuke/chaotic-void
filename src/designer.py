@@ -6,7 +6,6 @@ managing page creation, drawing lines, and placing text frames for
 dates, holidays, astronomical data, and seasons.
 """
 
-from calendar import calendar
 import sys
 import datetime
 import re
@@ -632,8 +631,6 @@ def create_planner_A5(data, language):
     total_pages = len(page_data_list) + 2
 
     scribus.statusMessage("")
-    # scribus.progressReset()
-    # scribus.progressTotal(total_pages)
 
     create_A5_document()
     scribus.setRedraw(False)  # Optimize performance by disabling redraw
@@ -641,7 +638,6 @@ def create_planner_A5(data, language):
     createTextStyles()
     scribus.saveDocAs(filename)
 
-    # scribus.progressSet(1)
     drawFirstPage(data, language)
     scribus.newPage(-1)
     drawSecondPage(data, language)
@@ -651,7 +647,6 @@ def create_planner_A5(data, language):
         if current_page < total_pages:
             scribus.newPage(-1)
             pagesQty = scribus.pageCount()
-            # scribus.progressSet(pagesQty if pagesQty <= total_pages else total_pages)
             #--temp / debug
             # logger.log(f"starting page {current_page}")
             # logger.logmem()

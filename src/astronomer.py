@@ -15,8 +15,7 @@ from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
-
-JPL_EPHEMERIS_FILE = "de440s.bsp"
+import constants
 
 
 def bsp_alias(planet_name, data):
@@ -54,7 +53,7 @@ def opposition_conjunction(body, year, language):
         raise ValueError('[opposition_conjunction]: Oppositions and conjunctions can only be calculated for Mercury, Venus, Mars, Jupiter and Saturn')
     
     ts = load.timescale()
-    planets = load(JPL_EPHEMERIS_FILE)
+    planets = load(constants.JPL_EPHEMERIS_FILE)
     planet_sign = bsp_alias(body, planets)
     
     t0 = ts.utc(year - 1, 1, 1)
@@ -105,7 +104,7 @@ def max_elongation(body, year, language):
     t0 = ts.utc(year - 1)
     t1 = ts.utc(year + 1)
 
-    eph = load(JPL_EPHEMERIS_FILE)
+    eph = load(constants.JPL_EPHEMERIS_FILE)
     object = bsp_alias(body, eph)
     sun, earth, curr_body = eph['sun'], eph['earth'], eph[object.name]
 
@@ -163,7 +162,7 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
     longitude = t("longitude")
 
     ts = load.timescale()
-    eph = load(JPL_EPHEMERIS_FILE)
+    eph = load(constants.JPL_EPHEMERIS_FILE)
     bsp_object = bsp_alias(object, eph)
     target = eph[bsp_object.name]
     bluffton = wgs84.latlon(latitude, longitude)
@@ -338,7 +337,7 @@ def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
       [{'year': 2026, 'month': 3, 'day': 3, 'time': datetime.time(6, 34), ...}]
     """
     ts = load.timescale()
-    eph = load(JPL_EPHEMERIS_FILE)
+    eph = load(constants.JPL_EPHEMERIS_FILE)
     t0 = ts.utc(year - 1, 12, 1)
     t1 = ts.utc(year + 1, 1, 31)
     t, y, _ = eclipselib.lunar_eclipses(t0, t1, eph)

@@ -11,12 +11,9 @@ from tkinter import ttk
 from datetime import datetime
 from .translator import translator, by_acronym
 from .data.localization import languages
+import constants
 
 # --- Global Variables ---
-
-# Used for aesthetic window positioning based on the divine proportion
-GOLDEN_RATIO = 1.61803
-
 # List of available language keys imported from the localization data
 languages_list = sorted(list(languages.keys()))
 
@@ -116,8 +113,8 @@ def get_planner_edition():
     x = int((root.winfo_screenwidth() / 2) - (root.winfo_width() / 2))
     y = int(
         root.winfo_screenheight()
-        - (root.winfo_screenheight() / GOLDEN_RATIO)
-        - (root.winfo_height() / GOLDEN_RATIO)
+        - (root.winfo_screenheight() / constants.GOLDEN_RATIO)
+        - (root.winfo_height() / constants.GOLDEN_RATIO)
     )
     root.geometry(f"+{x}+{y}")
 
