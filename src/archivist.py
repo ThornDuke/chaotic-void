@@ -10,6 +10,7 @@ import psutil
 import os
 from .utilities import generate_filename
 
+
 class Logger:
     """
     A file-based logger that tracks elapsed time between log entries.
@@ -17,9 +18,9 @@ class Logger:
 
     def __init__(self):
         now = datetime.datetime.now()
-        self.filename = generate_filename(prefix='CAL', ext='.log')
+        self.filename = generate_filename(prefix="CAL", ext=".log")
         self.process_id = psutil.Process(os.getpid())
-        
+
         # Inizializziamo il riferimento temporale per il calcolo del delta
         self.last_log_time = now
 
@@ -33,20 +34,20 @@ class Logger:
         Writes a message entry with timestamp and elapsed time since last call.
         """
         now = datetime.datetime.now()
-        
+
         # Calcolo della differenza di tempo
         elapsed = now - self.last_log_time
         # Formattiamo il delta (es: 0:00:05.123456)
-        delta_str = str(elapsed) 
-        
+        delta_str = str(elapsed)
+
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-        
+
         # Costruiamo l'entrata includendo il delta
         log_entry = f"[{timestamp}] (+{delta_str})\n{message}\n\n"
 
         with open(self.filename, "a", encoding="utf-8") as f:
             f.write(log_entry)
-            
+
         # Aggiorniamo l'ultimo timestamp per la prossima chiamata
         self.last_log_time = now
 
@@ -54,7 +55,7 @@ class Logger:
         """
         Log the current memory usage of the process to a file.
 
-        Calculates the RSS memory in Megabytes and appends a formatted 
+        Calculates the RSS memory in Megabytes and appends a formatted
         entry to the instance's log file.
         """
         mem_bytes = self.process_id.memory_info().rss

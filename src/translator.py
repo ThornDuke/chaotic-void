@@ -1,5 +1,6 @@
 from .data.localization import languages
 
+
 def by_acronym(target_acronym: str) -> str:
     """
     Searches for a language name based on its acronym.

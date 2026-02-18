@@ -88,14 +88,14 @@ def main() -> None:
     sys_report = check_requirements()
     if not validate_requirements(sys_report):
         return
-    
+
     # edition contiene {'year': int, 'language': str}
     edition = mainform.get_planner_edition()
     if edition == None:
         return
-    
+
     try:
-        process_start = datetime.datetime.now().replace(microsecond=0)                
+        process_start = datetime.datetime.now().replace(microsecond=0)
         year = edition["year"]
         language = edition["language"]
         # Generazione dati e creazione layout

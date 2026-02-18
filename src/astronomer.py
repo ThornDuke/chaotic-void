@@ -9,21 +9,25 @@ holidays (Easter) using the 'astral' and 'pyephem' libraries.
 import datetime
 from zoneinfo import ZoneInfo
 from collections import namedtuple
+from scribus import getGuiLanguage  # pyright: ignore[reportMissingImports]
 from skyfield import almanac, eclipselib
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
-import constants
+from . import constants
+from .utilities import template_replace, by_acronym
+
+ui_t = translator(by_acronym(getGuiLanguage()))
 
 
 def bsp_alias(planet_name, data):
-    PlanetResult = namedtuple('PlanetResult', ['name', 'code'])
-    
+    PlanetResult = namedtuple("PlanetResult", ["name", "code"])
+
     search_name = planet_name.upper()
     barycenter_name = f"{search_name}_BARYCENTER"
-    
+
     clean_match = None
     barycenter_match = None
 
@@ -32,7 +36,7 @@ def bsp_alias(planet_name, data):
     for code, aliases in names.items():
         if search_name in aliases:
             clean_match = PlanetResult(name=search_name, code=code)
-            break 
+            break
         if barycenter_name in aliases:
             barycenter_match = PlanetResult(name=barycenter_name, code=code)
 
@@ -40,22 +44,32 @@ def bsp_alias(planet_name, data):
         return clean_match
     if barycenter_match:
         return barycenter_match
-    
-    raise ValueError(f"[bsp_alias]: The planet '{planet_name}' is not present in the provided dictionary.")
+
+    raise ValueError(
+        template_replace(ui_t("err_planet_not_present"), planet_name=planet_name)
+    )
 
 
-def opposition_conjunction(body, year, language):    
+def opposition_conjunction(body, year, language):
     t = translator(language)
     timezone = ZoneInfo(t("timezone"))
 
     l_body = body.lower()
-    if l_body not in ['mars', 'jupiter', 'saturn', 'mercury', 'venus']:
-        raise ValueError('[opposition_conjunction]: Oppositions and conjunctions can only be calculated for Mercury, Venus, Mars, Jupiter and Saturn')
-    
+    if l_body not in [
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        "mercury",
+        "venus",
+    ]:
+        raise ValueError(t("err_bad_opposition_target"))
+
     ts = load.timescale()
     planets = load(constants.JPL_EPHEMERIS_FILE)
     planet_sign = bsp_alias(body, planets)
-    
+
     t0 = ts.utc(year - 1, 1, 1)
     t1 = ts.utc(year + 1, 12, 31)
     f = almanac.oppositions_conjunctions(planets, planets[planet_sign.name])
@@ -69,34 +83,37 @@ def opposition_conjunction(body, year, language):
         #           sc -> superior conjunction
         #           c -> conjunction
         #           o -> opposition
-        oc_type = ''
+        oc_type = ""
         if oc == 0:
-            if l_body in ['mercury', 'venus']:
-                oc_type = 'ic'
+            if l_body in ["mercury", "venus"]:
+                oc_type = "ic"
             else:
-                oc_type = 'c'
+                oc_type = "c"
         else:
-            if l_body in ['mercury', 'venus']:
-                oc_type = 'sc'
+            if l_body in ["mercury", "venus"]:
+                oc_type = "sc"
             else:
-                oc_type = 'o'
-        result.append({
-            'year': int(f"{ti.utc.year}"),
-            'month': int(f"{ti.utc.month}"),
-            'day': int(f"{ti.utc.day}"),
-            f"{body}_oc_time": tz_time,
-            f"{body}_oc": oc,
-            f"{body}_oc_type": oc_type
-        })
-    
+                oc_type = "o"
+        result.append(
+            {
+                "year": int(f"{ti.utc.year}"),
+                "month": int(f"{ti.utc.month}"),
+                "day": int(f"{ti.utc.day}"),
+                f"{body}_oc_time": tz_time,
+                f"{body}_oc": oc,
+                f"{body}_oc_type": oc_type,
+            }
+        )
+
     return result
 
 
 def max_elongation(body, year, language):
+    t = translator(language)
     l_body = body.lower()
-    if l_body not in ['venus', 'mercury']:
-        raise ValueError('[max_elongation]: The maximum elongation can only be calculated for Mercury and Venus')
-    
+    if l_body not in ["venus", "mercury"]:
+        raise ValueError(t("err_bad_elongation_target"))
+
     t = translator(language)
     timezone = ZoneInfo(t("timezone"))
 
@@ -106,7 +123,7 @@ def max_elongation(body, year, language):
 
     eph = load(constants.JPL_EPHEMERIS_FILE)
     object = bsp_alias(body, eph)
-    sun, earth, curr_body = eph['sun'], eph['earth'], eph[object.name]
+    sun, earth, curr_body = eph["sun"], eph["earth"], eph[object.name]
 
     def elongation_at(t):
         e = earth.at(t)
@@ -125,17 +142,19 @@ def max_elongation(body, year, language):
         _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
         _, vlon, _ = e.observe(curr_body).apparent().frame_latlon(ecliptic_frame)
         is_east = (vlon.degrees - slon.degrees) % 360.0 < 180.0
-        direction = 'east' if is_east else 'west'
+        direction = "east" if is_east else "west"
         tz_t = t.astimezone(timezone)
-        result.append({
-            "year": t.utc.year,
-            "month": t.utc.month,
-            "day": t.utc.day,
-            f"{l_body}_elong_time": tz_t,
-            f"{l_body}_elong_degrees": elongation_degrees,
-            f"{l_body}_elong_direction": direction
-        })
-    
+        result.append(
+            {
+                "year": t.utc.year,
+                "month": t.utc.month,
+                "day": t.utc.day,
+                f"{l_body}_elong_time": tz_t,
+                f"{l_body}_elong_degrees": elongation_degrees,
+                f"{l_body}_elong_direction": direction,
+            }
+        )
+
     return result
 
 
@@ -181,9 +200,7 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
         t0 = ts.utc(date.year, date.month, date.day, 0)
         t1 = ts.utc(date.year, date.month, date.day, 23, 59, 59)
 
-        object_rise_times, _ = almanac.find_risings(
-            observer, target, t0, t1
-        )
+        object_rise_times, _ = almanac.find_risings(observer, target, t0, t1)
         object_transit_times = almanac.find_transits(observer, target, t0, t1)
         object_set_times, are_sets_visibles = almanac.find_settings(
             observer, target, t0, t1
@@ -191,8 +208,8 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
 
         prefix = object.lower().split()[0]
         for ort, ott, ost, isvisible in zip(
-            object_rise_times, object_transit_times,
-            object_set_times, are_sets_visibles):  # pyright: ignore[reportArgumentType]
+            object_rise_times, object_transit_times, object_set_times, are_sets_visibles
+        ):  # pyright: ignore[reportArgumentType]
             time_ort = ort.astimezone(timezone)
             time_ott = ott.astimezone(timezone)
             time_ost = ost.astimezone(timezone)
@@ -289,7 +306,7 @@ def get_easter_day(year):
       ValueError: If the year is before the introduction of the Gregorian calendar.
     """
     if year < 1583:
-        raise ValueError("[get_easter_day]: The year must be >= 1583 (Gregorian Calendar).")
+        raise ValueError(ui_t("err_easter_overflow"))
 
     # Meeus/Jones/Butcher Algorithm
     a = year % 19

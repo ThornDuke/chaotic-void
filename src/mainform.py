@@ -11,7 +11,7 @@ from tkinter import ttk
 from datetime import datetime
 from .translator import translator, by_acronym
 from .data.localization import languages
-import constants
+from . import constants
 
 # --- Global Variables ---
 # List of available language keys imported from the localization data

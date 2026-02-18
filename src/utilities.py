@@ -94,7 +94,9 @@ def check_requirements():
     def lib_availability(lib_name, min_version):
         # 'packaging' is a third-party library. Use fallback if missing.
         try:
-            from packaging.version import parse as parse_version # pyright: ignore[reportMissingImports]
+            from packaging.version import (
+                parse as parse_version,
+            )  # pyright: ignore[reportMissingImports]
         except ImportError:
             return {"available": False, "error": ui_t("checkform_lib_err")}
 
@@ -117,7 +119,6 @@ def check_requirements():
         font_list = scribus.getFontNames()
         return [{fn: fn in font_list} for fn in font_names]
 
-
     # --- Requirements ---
     SCRIBUSV = (1, 6, 1)
     PYTHONV = (3, 12, 3)
@@ -128,7 +129,7 @@ def check_requirements():
         "Simoncini Garamond Std Italic",
         "Simoncini Garamond Std Roman",
         "Symbola Regular",
-        "AstroGadget Regular"
+        "AstroGadget Regular",
     ]
 
     report = {}
@@ -182,11 +183,11 @@ def check_requirements():
     # --- Fonts ---
     report["fonts"] = font_availability(FONTS)
 
-    #--temp / debug
+    # --temp / debug
     # with open('report.txt', 'w') as rf:
     #   for item in report:
     #     rf.write(f"{item}: {report[item]}\n")
-    #--remove before release--/
+    # --remove before release--/
 
     return report
 
@@ -285,7 +286,8 @@ def validate_requirements(report):
 
     return True
 
-def generate_filename(prefix='', suffix='', ext=''):
+
+def generate_filename(prefix="", suffix="", ext=""):
     """
     Generate a timestamped filename string.
 
@@ -298,11 +300,12 @@ def generate_filename(prefix='', suffix='', ext=''):
         str: A formatted filename containing the current date and time.
     """
     now = datetime.datetime.now()
-    timestamp = now.strftime('%y%m%dT%H%M%S')
+    timestamp = now.strftime("%y%m%dT%H%M%S")
     return f"{prefix}{timestamp}{suffix}{ext}"
+
 
 def save_to_file(data, filename):
     formatted_data = pprint.pformat(data, sort_dicts=False)
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(formatted_data)
         f.close()

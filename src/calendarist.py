@@ -11,7 +11,7 @@ import scribus  # pyright: ignore[reportMissingImports]
 from . import astronomer
 from .translator import translator, by_acronym
 from .data.holidays import holidays
-from .utilities import generate_filename, save_to_file
+from .utilities import generate_filename, save_to_file, template_replace
 
 
 def generate_dates(anno: int) -> list[dict]:
@@ -32,7 +32,7 @@ def generate_dates(anno: int) -> list[dict]:
     ultimo_dicembre = datetime.date(anno, 12, 31)
 
     # Find the first Thursday on or before January 1st
-    giorni_prima = primo_gennaio.weekday() - 3 # Monday=0, Sunday=6
+    giorni_prima = primo_gennaio.weekday() - 3  # Monday=0, Sunday=6
     data_inizio = primo_gennaio - datetime.timedelta(days=giorni_prima)
 
     # Find the first Wednesday on or after December 31st
@@ -60,7 +60,7 @@ def generate_dates(anno: int) -> list[dict]:
     return giorni
 
 
-def add_translation(date_list: list[dict], language: str) -> list[dict]:
+def add_translation(date_list, language):
     """
     Appends translated month and weekday names to each date entry.
 
@@ -86,9 +86,15 @@ def add_translation(date_list: list[dict], language: str) -> list[dict]:
         weekday_index = d["weekday"]
 
         if not (0 <= month_index < len(months)):
-            raise IndexError(f"[add_translation]: Invalid month index: {month_index}")
+            raise IndexError(
+                template_replace(t("err_invalid_month_index"), month_index=month_index)
+            )
         if not (0 <= weekday_index < len(weekdays)):
-            raise IndexError(f"[add_translation]: Invalid weekday index: {weekday_index}")
+            raise IndexError(
+                template_replace(
+                    t("err_invalid_weekday_index"), weekday_index=weekday_index
+                )
+            )
 
         new_entry = d.copy()
         new_entry["translated_month"] = months[month_index]
@@ -117,7 +123,9 @@ def translated_seasons(seasons: list[dict], language: str) -> list[dict]:
         event_index = d["event_ord"]
 
         if not (0 <= event_index < len(season_strs)):
-            raise IndexError(f"[translated_seasons]: Invalid season event index: {event_index}")
+            raise IndexError(
+                template_replace(t("err_invalid_season_index"), event_index=event_index)
+            )
 
         new_entry = d.copy()
         new_entry["translated_season"] = season_strs[event_index]
@@ -189,8 +197,12 @@ def merge_calendar_data(target_list, **data_sources):
         "jupiter_oc_data_list",
         "saturn_data_list",
         "saturn_oc_data_list",
+        "uranus_data_list",
+        "uranus_oc_data_list",
+        "neptune_data_list",
+        "neptune_oc_data_list",
         "venus_max_elongation_data_list",
-        "mercury_max_elongation_data_list"
+        "mercury_max_elongation_data_list",
     ]
 
     config = {
@@ -205,10 +217,7 @@ def merge_calendar_data(target_list, **data_sources):
         },
         "easter_data_list": {
             "key_type": "ymd",
-            "mapping": {
-                "holiday_name": "holiday_name",
-                "is_easter": "is_easter"
-            },
+            "mapping": {"holiday_name": "holiday_name", "is_easter": "is_easter"},
         },
         "fixed_holidays_list": {
             "key_type": "md",  # Short key
@@ -216,33 +225,30 @@ def merge_calendar_data(target_list, **data_sources):
         },
         "seasons_list": {
             "key_type": "ymd",
-            "mapping": {
-                "translated_season": "season",
-                "event_ord": "season_type"
-            }
+            "mapping": {"translated_season": "season", "event_ord": "season_type"},
         },
         "venus_max_elongation_data_list": {
             "key_type": "ymd",
             "mapping": {
                 "venus_elong_time": "venus_elong_time",
                 "venus_elong_degrees": "venus_elong_degrees",
-                "venus_elong_direction": "venus_elong_direction"
-            }
+                "venus_elong_direction": "venus_elong_direction",
+            },
         },
         "mercury_max_elongation_data_list": {
             "key_type": "ymd",
             "mapping": {
                 "mercury_elong_time": "mercury_elong_time",
                 "mercury_elong_degrees": "mercury_elong_degrees",
-                "mercury_elong_direction": "mercury_elong_direction"
-            }
+                "mercury_elong_direction": "mercury_elong_direction",
+            },
         },
         "mercury_oc_data_list": {
             "key_type": "ymd",
             "mapping": {
                 "mercury_oc_time": "mercury_oc_time",
                 "mercury_oc": "mercury_oc",
-                "mercury_oc_type": "mercury_oc_type"
+                "mercury_oc_type": "mercury_oc_type",
             },
         },
         "venus_oc_data_list": {
@@ -250,7 +256,7 @@ def merge_calendar_data(target_list, **data_sources):
             "mapping": {
                 "venus_oc_time": "venus_oc_time",
                 "venus_oc": "venus_oc",
-                "venus_oc_type": "venus_oc_type"
+                "venus_oc_type": "venus_oc_type",
             },
         },
         "mars_oc_data_list": {
@@ -258,7 +264,7 @@ def merge_calendar_data(target_list, **data_sources):
             "mapping": {
                 "mars_oc_time": "mars_oc_time",
                 "mars_oc": "mars_oc",
-                "mars_oc_type": "mars_oc_type"
+                "mars_oc_type": "mars_oc_type",
             },
         },
         "jupiter_oc_data_list": {
@@ -266,17 +272,33 @@ def merge_calendar_data(target_list, **data_sources):
             "mapping": {
                 "jupiter_oc_time": "jupiter_oc_time",
                 "jupiter_oc": "jupiter_oc",
-                "jupiter_oc_type": "jupiter_oc_type"
-            }
+                "jupiter_oc_type": "jupiter_oc_type",
+            },
         },
         "saturn_oc_data_list": {
             "key_type": "ymd",
             "mapping": {
                 "saturn_oc_time": "saturn_oc_time",
                 "saturn_oc": "saturn_oc",
-                "saturn_oc_type": "saturn_oc_type"
-            }
-        }
+                "saturn_oc_type": "saturn_oc_type",
+            },
+        },
+        "uranus_oc_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "uranus_oc_time": "uranus_oc_time",
+                "uranus_oc": "uranus_oc",
+                "uranus_oc_type": "uranus_oc_type",
+            },
+        },
+        "neptune_oc_data_list": {
+            "key_type": "ymd",
+            "mapping": {
+                "neptune_oc_time": "neptune_oc_time",
+                "neptune_oc": "neptune_oc",
+                "neptune_oc_type": "neptune_oc_type",
+            },
+        },
     }
 
     # Add planets to configuration (generic logic: copy everything found)
@@ -415,7 +437,7 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     t = translator(language)
 
     # Generate core date structures
-    scribus.progressTotal(11)
+    scribus.progressTotal(12)
     scribus.progressReset()
     notify(1, "cal_structure_creation")
     base_dates = generate_dates(year)
@@ -440,7 +462,7 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
             "month": easter_day["month"],
             "day": easter_day["day"],
             "holiday_name": t("holidays")[0],
-            "is_easter": True
+            "is_easter": True,
         },
         {
             "year": easter_day["year"],
@@ -452,29 +474,37 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
 
     notify(4, "cal_mercury_eph")
     mercury_data = astronomer.get_ephemeris_data("Mercury", year, language)
-    mercury_max_elongation_data = astronomer.max_elongation('mercury', year, language)
-    mercury_oc_data = astronomer.opposition_conjunction('mercury', year, language)
+    mercury_max_elongation_data = astronomer.max_elongation("mercury", year, language)
+    mercury_oc_data = astronomer.opposition_conjunction("mercury", year, language)
 
     notify(5, "cal_venus_eph")
     venus_data = astronomer.get_ephemeris_data("Venus", year, language)
-    venus_max_elongation_data = astronomer.max_elongation('venus', year, language)
-    venus_oc_data = astronomer.opposition_conjunction('venus', year, language)
+    venus_max_elongation_data = astronomer.max_elongation("venus", year, language)
+    venus_oc_data = astronomer.opposition_conjunction("venus", year, language)
 
     notify(6, "cal_mars_eph")
-    mars_data = astronomer.get_ephemeris_data("Mars barycenter", year, language)
-    mars_oc_data = astronomer.opposition_conjunction('mars', year, language)
+    mars_data = astronomer.get_ephemeris_data("Mars", year, language)
+    mars_oc_data = astronomer.opposition_conjunction("mars", year, language)
 
     notify(7, "cal_jupiter_eph")
-    jupiter_data = astronomer.get_ephemeris_data("Jupiter barycenter", year, language)
-    jupiter_oc_data = astronomer.opposition_conjunction('jupiter', year, language)
+    jupiter_data = astronomer.get_ephemeris_data("Jupiter", year, language)
+    jupiter_oc_data = astronomer.opposition_conjunction("jupiter", year, language)
 
     notify(8, "cal_saturn_eph")
-    saturn_data = astronomer.get_ephemeris_data("Saturn barycenter", year, language)
-    saturn_oc_data = astronomer.opposition_conjunction('saturn', year, language)
+    saturn_data = astronomer.get_ephemeris_data("Saturn", year, language)
+    saturn_oc_data = astronomer.opposition_conjunction("saturn", year, language)
 
-    notify(9, "cal_equinoxes_eph")
+    notify(9, "cal_uranus_eph")
+    uranus_data = astronomer.get_ephemeris_data("Uranus", year, language)
+    uranus_oc_data = astronomer.opposition_conjunction("uranus", year, language)
+
+    notify(10, "cal_neptune_eph")
+    neptune_data = astronomer.get_ephemeris_data("Neptune", year, language)
+    neptune_oc_data = astronomer.opposition_conjunction("neptune", year, language)
+
+    notify(11, "cal_equinoxes_eph")
     fixed_holidays = get_holidays_list(year, language)
-    seasons = translated_seasons(astronomer.get_seasons(year), language)    
+    seasons = translated_seasons(astronomer.get_seasons(year), language)
 
     # Consolidate all data into final list
     full_calendar = merge_calendar_data(
@@ -496,14 +526,18 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
         jupiter_oc_data_list=jupiter_oc_data,
         saturn_data_list=saturn_data,
         saturn_oc_data_list=saturn_oc_data,
-        venus_max_elongation_data_list = venus_max_elongation_data,
-        mercury_max_elongation_data_list = mercury_max_elongation_data
+        uranus_data_list=uranus_data,
+        uranus_oc_data_list=uranus_oc_data,
+        neptune_data_list=neptune_data,
+        neptune_oc_data_list=neptune_oc_data,
+        venus_max_elongation_data_list=venus_max_elongation_data,
+        mercury_max_elongation_data_list=mercury_max_elongation_data,
     )
 
-    #--temp / debug
-    # calendar_filename = generate_filename(prefix='calendar_', ext='.py')
-    # save_to_file(full_calendar, calendar_filename)
-    #--remove before release--/
+    # --temp / debug
+    calendar_filename = generate_filename(prefix="calendar_", ext=".py")
+    save_to_file(full_calendar, calendar_filename)
+    # --remove before release--/
 
     scribus.progressReset()
     scribus.statusMessage("")
