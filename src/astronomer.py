@@ -6,10 +6,11 @@ lunar phases, seasonal transitions (equinoxes/solstices), and religious
 holidays (Easter) using the 'astral' and 'pyephem' libraries.
 """
 
+import sys
 import datetime
 from zoneinfo import ZoneInfo
 from collections import namedtuple
-from scribus import getGuiLanguage  # pyright: ignore[reportMissingImports]
+import scribus  # pyright: ignore[reportMissingImports]
 from skyfield import almanac, eclipselib
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame
@@ -17,9 +18,9 @@ from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
 from . import constants
-from .utilities import template_replace, by_acronym
+from .utilities import fill, by_acronym
 
-ui_t = translator(by_acronym(getGuiLanguage()))
+ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
 def bsp_alias(planet_name, data):
@@ -45,9 +46,7 @@ def bsp_alias(planet_name, data):
     if barycenter_match:
         return barycenter_match
 
-    raise ValueError(
-        template_replace(ui_t("err_planet_not_present"), planet_name=planet_name)
-    )
+    raise ValueError(fill(ui_t("err_planet_not_present"), planet_name=planet_name))
 
 
 def opposition_conjunction(body, year, language):
@@ -64,10 +63,19 @@ def opposition_conjunction(body, year, language):
         "mercury",
         "venus",
     ]:
-        raise ValueError(t("err_bad_opposition_target"))
+        raise ValueError(ui_t("err_bad_opposition_target"))
 
     ts = load.timescale()
-    planets = load(constants.JPL_EPHEMERIS_FILE)
+    try:
+        planets = load(constants.JPL_EPHEMERIS_FILE)
+    except (IOError, ValueError) as e:
+        scribus.messageBox(
+            ui_t("mainform_title"),
+            fill(ui_t("err_bsp_data_loading"), error=e),
+            scribus.ICON_CRITICAL,
+        )
+        sys.exit()
+
     planet_sign = bsp_alias(body, planets)
 
     t0 = ts.utc(year - 1, 1, 1)
@@ -109,10 +117,9 @@ def opposition_conjunction(body, year, language):
 
 
 def max_elongation(body, year, language):
-    t = translator(language)
     l_body = body.lower()
     if l_body not in ["venus", "mercury"]:
-        raise ValueError(t("err_bad_elongation_target"))
+        raise ValueError(ui_t("err_bad_elongation_target"))
 
     t = translator(language)
     timezone = ZoneInfo(t("timezone"))
@@ -121,7 +128,16 @@ def max_elongation(body, year, language):
     t0 = ts.utc(year - 1)
     t1 = ts.utc(year + 1)
 
-    eph = load(constants.JPL_EPHEMERIS_FILE)
+    try:
+        eph = load(constants.JPL_EPHEMERIS_FILE)
+    except (IOError, ValueError) as e:
+        scribus.messageBox(
+            ui_t("mainform_title"),
+            fill(ui_t("err_bsp_data_loading"), error=e),
+            scribus.ICON_CRITICAL,
+        )
+        sys.exit()
+
     object = bsp_alias(body, eph)
     sun, earth, curr_body = eph["sun"], eph["earth"], eph[object.name]
 
@@ -181,7 +197,17 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
     longitude = t("longitude")
 
     ts = load.timescale()
-    eph = load(constants.JPL_EPHEMERIS_FILE)
+
+    try:
+        eph = load(constants.JPL_EPHEMERIS_FILE)
+    except (IOError, ValueError) as e:
+        scribus.messageBox(
+            ui_t("mainform_title"),
+            fill(ui_t("err_bsp_data_loading"), error=e),
+            scribus.ICON_CRITICAL,
+        )
+        sys.exit()
+
     bsp_object = bsp_alias(object, eph)
     target = eph[bsp_object.name]
     bluffton = wgs84.latlon(latitude, longitude)
@@ -354,7 +380,17 @@ def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
       [{'year': 2026, 'month': 3, 'day': 3, 'time': datetime.time(6, 34), ...}]
     """
     ts = load.timescale()
-    eph = load(constants.JPL_EPHEMERIS_FILE)
+
+    try:
+        eph = load(constants.JPL_EPHEMERIS_FILE)
+    except Exception as e:
+        scribus.messageBox(
+            ui_t("mainform_title"),
+            fill(ui_t("err_bsp_data_loading"), error=e),
+            scribus.ICON_CRITICAL,
+        )
+        sys.exit()
+
     t0 = ts.utc(year - 1, 12, 1)
     t1 = ts.utc(year + 1, 1, 31)
     t, y, _ = eclipselib.lunar_eclipses(t0, t1, eph)

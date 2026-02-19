@@ -56,6 +56,6 @@ def translator(language: str):
         Returns:
           str: The localized text if the key exists; otherwise, an empty string.
         """
-        return languages[lang].get(translation_key, "")
+        return languages[lang].get(translation_key, "### TRANSLATION NOT AVAILABLE ###")
 
     return result

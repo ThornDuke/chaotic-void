@@ -10,7 +10,7 @@ from .translator import by_acronym, translator
 ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
-def template_replace(template, **replacements):
+def fill(template, **replacements):
     """
     Replaces placeholders in the format {{key_name}} with corresponding values
     provided as keyword arguments.
@@ -37,7 +37,7 @@ def template_replace(template, **replacements):
         key = match.group(1).strip()
         if key not in replacements:
             raise KeyError(
-                f"[template_replace]: Placeholder '{{{{{key}}}}}' not found in provided arguments."
+                f"[fill]: Placeholder '{{{{{key}}}}}' not found in provided arguments."
             )
         return str(replacements[key])
 
@@ -213,7 +213,7 @@ def validate_requirements(report):
         req = ".".join(map(str, report["scribus"]["req_ver"]))
         curr = ".".join(map(str, report["scribus"]["curr_ver"]))
         missing_items.append(
-            template_replace(ui_t("checkform_scribus"), curr_ver=curr, req_ver=req)
+            fill(ui_t("checkform_scribus"), curr_ver=curr, req_ver=req)
         )
 
     # 2. Check Python
@@ -222,9 +222,7 @@ def validate_requirements(report):
         # Extract major.minor.micro from sys.version_info
         v = report["python"]["curr_ver"]
         curr = f"{v.major}.{v.minor}.{v.micro}"
-        missing_items.append(
-            template_replace(ui_t("checkform_python"), curr_ver=curr, req_ver=req)
-        )
+        missing_items.append(fill(ui_t("checkform_python"), curr_ver=curr, req_ver=req))
 
     # 3. Check Tkinter
     tk_rep = report["tkinter"]
@@ -232,7 +230,7 @@ def validate_requirements(report):
         missing_items.append(ui_t("chekform_tk"))
     elif not tk_rep["is_enough"]:
         missing_items.append(
-            template_replace(
+            fill(
                 ui_t("checkform_tk_ver"),
                 curr_ver=tk_rep["curr_ver"],
                 req_ver=tk_rep["req_ver"],
@@ -247,16 +245,14 @@ def validate_requirements(report):
 
         if "error" in lib_rep:
             missing_items.append(
-                template_replace(
-                    "• {{lib_name}}: {{err}}", lib_name=lib, err=lib_rep["error"]
-                )
+                fill("• {{lib_name}}: {{err}}", lib_name=lib, err=lib_rep["error"])
             )
 
         elif not lib_rep["available"]:
-            missing_items.append(template_replace(ui_t("checkform_lib"), library=lib))
+            missing_items.append(fill(ui_t("checkform_lib"), library=lib))
         elif not lib_rep["is_enough"]:
             missing_items.append(
-                template_replace(
+                fill(
                     ui_t("checkform_lib_ver"),
                     library=lib,
                     curr_ver=lib_rep["curr_ver"],
@@ -269,9 +265,7 @@ def validate_requirements(report):
     for font_entry in report["fonts"]:
         for font_name, exists in font_entry.items():
             if not exists:
-                missing_items.append(
-                    template_replace(ui_t("checkform_font"), font_name=font_name)
-                )
+                missing_items.append(fill(ui_t("checkform_font"), font_name=font_name))
 
     # Final Decision
     if missing_items:

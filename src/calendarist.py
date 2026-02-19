@@ -11,7 +11,9 @@ import scribus  # pyright: ignore[reportMissingImports]
 from . import astronomer
 from .translator import translator, by_acronym
 from .data.holidays import holidays
-from .utilities import generate_filename, save_to_file, template_replace
+from .utilities import generate_filename, save_to_file, fill
+
+ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
 def generate_dates(anno: int) -> list[dict]:
@@ -87,13 +89,11 @@ def add_translation(date_list, language):
 
         if not (0 <= month_index < len(months)):
             raise IndexError(
-                template_replace(t("err_invalid_month_index"), month_index=month_index)
+                fill(ui_t("err_invalid_month_index"), month_index=month_index)
             )
         if not (0 <= weekday_index < len(weekdays)):
             raise IndexError(
-                template_replace(
-                    t("err_invalid_weekday_index"), weekday_index=weekday_index
-                )
+                fill(ui_t("err_invalid_weekday_index"), weekday_index=weekday_index)
             )
 
         new_entry = d.copy()
@@ -124,7 +124,7 @@ def translated_seasons(seasons: list[dict], language: str) -> list[dict]:
 
         if not (0 <= event_index < len(season_strs)):
             raise IndexError(
-                template_replace(t("err_invalid_season_index"), event_index=event_index)
+                fill(ui_t("err_invalid_season_index"), event_index=event_index)
             )
 
         new_entry = d.copy()

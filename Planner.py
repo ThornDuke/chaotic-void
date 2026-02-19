@@ -77,7 +77,7 @@ import src.mainform as mainform
 import src.calendarist as calendarist
 import src.designer as designer
 from src.translator import translator, by_acronym
-from src.utilities import template_replace, check_requirements, validate_requirements
+from src.utilities import fill, check_requirements, validate_requirements
 
 # Inizializzazione traduttore
 t = translator(by_acronym(scribus.getGuiLanguage()))
@@ -106,7 +106,7 @@ def main() -> None:
         duration: datetime.timedelta = process_end - process_start
         scribus.messageBox(
             "Planner Generator",
-            template_replace(t("good_outcome"), processing_time=duration),
+            fill(t("good_outcome"), processing_time=duration),
             scribus.ICON_INFORMATION,
         )
     finally:

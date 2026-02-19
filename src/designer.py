@@ -12,7 +12,7 @@ import scribus  # pyright: ignore[reportMissingImports]
 from .data.lines import get_A5_line_data
 from .translator import translator, by_acronym
 from .utilities import (
-    template_replace,
+    fill,
     round_dt_to_min,
     generate_filename,
     save_to_file,
@@ -589,11 +589,20 @@ def extract_planetary_events(input_data):
 
 def drawFirstPage(data, language):
     def _draw_planet_frame(ypos, text):
-        text_frame = scribus.createText(17, ypos, 121, 3.5)
+        text_frame = scribus.createText(
+            17, ypos, 60 if not text.startswith("<") else 120, 3.5
+        )
         scribus.setText(text, text_frame)
         scribus.setParagraphStyle("text_left_par_style", text_frame)
         scribus.selectText(0, 1, text_frame)
         scribus.setCharacterStyle("ephem_sym_ch_style")
+
+    def _draw_acronym_frame(ypos, text, small_text):
+        text_frame = scribus.createText(78, ypos, 60, 3.5)
+        scribus.setText(text, text_frame)
+        scribus.setParagraphStyle("text_left_par_style", text_frame)
+        scribus.selectText(0, len(small_text), text_frame)
+        scribus.setCharacterStyle("smallcaps_ch_style")
 
     t = translator(language)
     year = get_main_year(data)
@@ -602,30 +611,39 @@ def drawFirstPage(data, language):
     scribus.setText(f"{year}", title_frame)
     scribus.setParagraphStyle("title_par_style", title_frame)
 
-    legend_frame = scribus.createText(17, 144.240, 121, 3.5)
+    legend_frame = scribus.createText(17, 136.240, 121, 3.5)
     scribus.setText(f"{t('legend')}", legend_frame)
     scribus.setParagraphStyle("text_left_par_style", legend_frame)
 
-    moonphases_frame = scribus.createText(17, 148.490, 121, 3.5)
+    moonphases_frame = scribus.createText(17, 140.490, 121, 3.5)
     moonphases_text = f"🌑 🌓 🌕 🌗  {t('legend_moonphases')}"
     scribus.setText(moonphases_text, moonphases_frame)
     scribus.setParagraphStyle("text_left_par_style", moonphases_frame)
     scribus.selectText(0, 10, moonphases_frame)
     scribus.setCharacterStyle("moonphase_ch_style")
 
-    _draw_planet_frame(152.741, f"<  {t('legend_mooneclipses')}")
-    _draw_planet_frame(156.992, f"A  {t('sun')}")
-    _draw_planet_frame(161.243, f"B  {t('moon')}")
-    _draw_planet_frame(165.494, f"C  {t('mercury')}")
-    _draw_planet_frame(169.745, f"D  {t('venus')}")
-    _draw_planet_frame(173.996, f"E  {t('mars')}")
-    _draw_planet_frame(178.247, f"F  {t('jupiter')}")
-    _draw_planet_frame(182.498, f"G  {t('saturn')}")
+    _draw_planet_frame(144.741, f"<  {t('legend_mooneclipses')}")
+    _draw_planet_frame(148.992, f"A  {t('sun')}")
+    _draw_planet_frame(153.243, f"B  {t('moon')}")
+    _draw_planet_frame(157.494, f"C  {t('mercury')}")
+    _draw_planet_frame(161.745, f"D  {t('venus')}")
+    _draw_planet_frame(165.996, f"E  {t('mars')}")
+    _draw_planet_frame(170.247, f"F  {t('jupiter')}")
+    _draw_planet_frame(174.498, f"G  {t('saturn')}")
+    _draw_planet_frame(178.626, f"H  {t('uranus')}")
+    _draw_planet_frame(183.582, f"I  {t('neptune')}")
+    _draw_acronym_frame(148.992, f"mew  {t('maj_elon_west')}", "mew")
+    _draw_acronym_frame(153.243, f"mee  {t('maj_elon_east')}", "mee")
+    _draw_acronym_frame(157.494, f"sup conj  {t('sup_conj')}", "sup conj")
+    _draw_acronym_frame(161.745, f"inf conj  {t('inf_conj')}", "inf conj")
+    _draw_acronym_frame(165.996, f"conj  {t('conj')}", "conj")
+    _draw_acronym_frame(170.247, f"opp  {t('opp')}", "opp")
+    _draw_acronym_frame(174.498, f"ecl tot  {t('ecl_tot')}", "ecl tot")
+    _draw_acronym_frame(178.626, f"ecl par  {t('ecl_par')}", "ecl par")
+    _draw_acronym_frame(183.582, f"ecl pen  {t('ecl_pen')}", "ecl pen")
 
     explanation_frame = scribus.createText(17, 187.335, 121, 12.461)
-    scribus.setText(
-        template_replace(t("legend_explanation"), city=t("capital")), explanation_frame
-    )
+    scribus.setText(fill(t("legend_explanation"), city=t("capital")), explanation_frame)
     scribus.setFont("Simoncini Garamond Std Roman", explanation_frame)
     scribus.setParagraphStyle("title_explanation_par_style", explanation_frame)
     scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, explanation_frame)
@@ -808,7 +826,7 @@ def create_planner_A5(data, language):
     #         # logger.log(f"starting page {current_page}")
     #         # logger.logmem()
     #         #--remove before release--/
-    #         msg = template_replace(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
+    #         msg = fill(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
     #         scribus.statusMessage(msg)
     #         # Scribus getPageType: 2 for Right pages, 0 for Left pages
     #         if scribus.getPageType(current_page) == 2:
@@ -818,7 +836,7 @@ def create_planner_A5(data, language):
     #         else:
     #             scribus.messageBox(
     #                 ui_t("mainform_title"),
-    #                 template_replace(ui_t("err_unknown_page_type"), current_page=current_page),
+    #                 fill(ui_t("err_unknown_page_type"), current_page=current_page),
     #                 scribus.ICON_CRITICAL,
     #             )
     #             sys.exit(1)
