@@ -256,6 +256,34 @@ def split_list(input_list):
     return result
 
 
+def resize_height(frame):
+    w, _ = scribus.getSize(frame)
+    currh = 190
+    step = 1
+    while True:
+        scribus.sizeObject(w, currh, frame)
+        if (scribus.textOverflows(frame, 1) > 0) or (currh == 0):
+            break
+        currh -= step
+    currh += step
+    scribus.sizeObject(w, currh, frame)
+    return currh
+
+
+def resize_width(frame):
+    _, h = scribus.getSize(frame)
+    currw = 120
+    step = 1
+    while True:
+        scribus.sizeObject(currw, h, frame)
+        if (scribus.textOverflows(frame, 1) > 0) or (currw == 0):
+            break
+        currw -= step
+    currw += step
+    scribus.sizeObject(currw, h, frame)
+    return currw
+
+
 def draw_weekday_frame(x, y, w, h, text):
     """Creates a text frame for the weekday name and day number."""
     text_frame = scribus.createText(x, y, w, h)
@@ -366,15 +394,43 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
 
 
 def draw_planet_events(x_pos, y_pos, str):
-    # devono entrare:
-    # eclissi di luna, opposizioni, congiunzioni, elongazioni
-    # str è una stringa inframezzata da '\n'
-    # vedi 'coutch.py
+    def chunk_idxs(curr_str):
+        results = []
+        current_offset = 0
 
-    text_frame = scribus.createText(x_pos, y_pos, 100, 100)
-    scribus.setText(str, text_frame)
-    scribus.setParagraphStyle("text_right_par_style", text_frame)
-    scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, text_frame)
+        lines = curr_str.splitlines(keepends=True)
+
+        for line in lines:
+            first_space = line.find(" ")
+            if first_space != -1:
+                start_pos = current_offset + first_space + 1
+
+                h_idx = line.find("h")
+                if h_idx != -1:
+                    space_before_h = line[:h_idx].rfind(" ")
+                    length = space_before_h - first_space - 1
+                    results.append((start_pos, length))
+
+            current_offset += len(line)
+
+        return results
+
+    if len(str) > 0:
+        # crea il frame di testo
+        text_frame = scribus.createText(x_pos, y_pos, 29, 100)
+        scribus.setText(str, text_frame)
+        scribus.setParagraphStyle("planets_events_par_style", text_frame)
+        scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, text_frame)
+        # aggiunge la formattazione per carattere
+        idxs = chunk_idxs(str)
+        for start, length in idxs:
+            scribus.selectText(start - 2, 1, text_frame)
+            scribus.setCharacterStyle("ephem_sym_ch_style")
+            scribus.selectText(start, length, text_frame)
+            scribus.setCharacterStyle("smallcaps_ch_style")
+        # ottimizza le dimensioni e lo posiziona con precisione
+        frame_height = resize_height(text_frame)
+        scribus.moveObjectAbs(x_pos, y_pos - frame_height - 0.365, text_frame)
 
 
 def draw_page(side, items):
@@ -390,6 +446,44 @@ def draw_page(side, items):
         items (list[dict]): A list of data dictionaries containing daily
             information (month, year, day, weekday, phase, holiday, etc.).
     """
+
+    def generate_events_str(dct):
+        planets = [
+            ("mercury", "C"),
+            ("venus", "D"),
+            ("moon", "B"),
+            ("mars", "E"),
+            ("jupiter", "F"),
+            ("saturn", "G"),
+            ("uranus", "H"),
+            ("neptune", "I"),
+        ]
+        conj_types = {"o": "opp", "c": "conj", "sc": "sup conj", "ic": "inf conj"}
+        eclipse_types = {
+            0: "pen",
+            1: "part",
+            2: "tot",
+        }
+        strings = []
+
+        for planet, sym in planets:
+            if f"{planet}_elong_time" in dct:
+                event_sign = (
+                    "mee" if dct[f"{planet}_elong_direction"] == "east" else "mew"
+                )
+                event_time = hour_min(dct[f"{planet}_elong_time"])
+                strings.append(f"{sym} {event_sign} h{event_time}")
+            if f"{planet}_oc" in dct:
+                event_sign = conj_types[dct[f"{planet}_oc_type"]]
+                event_time = hour_min(dct[f"{planet}_oc_time"])
+                strings.append(f"{sym} {event_sign} h{event_time}")
+            if f"{planet}_eclipse_time" in dct:
+                event_sign = f"ecl {eclipse_types[dct[f"{planet}_eclipse_type_num"]]}"
+                event_time = hour_min(dct[f"{planet}_eclipse_time"])
+                strings.append(f"{sym} {event_sign} h{event_time}")
+
+        return "\n".join(strings)
+
     year_string = str(items[0]["year"])
     month_string = items[0]["translated_month"]
 
@@ -464,11 +558,19 @@ def draw_page(side, items):
         if side == "left":
             draw_planets_ephemeris(101, 75.362 + (i * 60.537), items[i])
 
+        # Planets Events
+        if side == "left":
+            draw_planet_events(10, 78.726 + (i * 60.537), generate_events_str(items[i]))
+
     if side == "right":  # out of the cicle because draw a full page
         draw_planets_ephemeris(108, 75.362, items[0])
         draw_planets_ephemeris(108, 135.899, items[1])
         draw_planets_ephemeris(47.324, 196.436, items[2])
         draw_planets_ephemeris(108, 196.436, items[3])
+        draw_planet_events(17, 78.726, generate_events_str(items[0]))
+        draw_planet_events(17, 139.276, generate_events_str(items[1]))
+        draw_planet_events(17, 199.825, generate_events_str(items[2]))
+        draw_planet_events(77.676, 199.825, generate_events_str(items[3]))
 
     # Handle the 4th day specifically (left column of the last row)
     if side == "right":
@@ -499,34 +601,6 @@ def get_main_year(data):
         (item for item in data if item["month"] == 2 and item["day"] == 1), None
     )
     return first_day["year"] if first_day else None
-
-
-def resize_height(frame):
-    w, _ = scribus.getSize(frame)
-    currh = 190
-    step = 1
-    while True:
-        scribus.sizeObject(w, currh, frame)
-        if (scribus.textOverflows(frame, 1) > 0) or (currh == 0):
-            break
-        currh -= step
-    currh += step
-    scribus.sizeObject(w, currh, frame)
-    return currh
-
-
-def resize_width(frame):
-    _, h = scribus.getSize(frame)
-    currw = 120
-    step = 1
-    while True:
-        scribus.sizeObject(currw, h, frame)
-        if (scribus.textOverflows(frame, 1) > 0) or (currw == 0):
-            break
-        currw -= step
-    currw += step
-    scribus.sizeObject(currw, h, frame)
-    return currw
 
 
 def extract_planetary_events(input_data):
@@ -810,35 +884,35 @@ def create_planner_A5(data, language):
     scribus.newPage(-1)
     drawSecondPage(data, language)
 
-    # for item in page_data_list:
-    #     current_page = scribus.currentPage()
-    #     if current_page < total_pages:
-    #         scribus.newPage(-1)
-    #         pagesQty = scribus.pageCount()
-    #         # --temp / debug
-    #         # logger.log(f"starting page {current_page}")
-    #         # logger.logmem()
-    #         # --remove before release--/
-    #         msg = fill(
-    #             ui_t("planner_page_elaborating"),
-    #             pagesQty=pagesQty,
-    #             total_pages=total_pages,
-    #         )
-    #         scribus.statusMessage(msg)
-    #         # Scribus getPageType: 2 for Right pages, 0 for Left pages
-    #         if scribus.getPageType(current_page) == 2:
-    #             draw_page("right", item)
-    #         elif scribus.getPageType(current_page) == 0:
-    #             draw_page("left", item)
-    #         else:
-    #             scribus.messageBox(
-    #                 ui_t("mainform_title"),
-    #                 fill(ui_t("err_unknown_page_type"), current_page=current_page),
-    #                 scribus.ICON_CRITICAL,
-    #             )
-    #             sys.exit(1)
-    #         if (current_page > 0) and (current_page % 4 == 0):
-    #             scribus.saveDoc()
+    for item in page_data_list:
+        current_page = scribus.currentPage()
+        if current_page < total_pages:
+            scribus.newPage(-1)
+            pagesQty = scribus.pageCount()
+            # --temp / debug
+            # logger.log(f"starting page {current_page}")
+            # logger.logmem()
+            # --remove before release--/
+            msg = fill(
+                ui_t("planner_page_elaborating"),
+                pagesQty=pagesQty,
+                total_pages=total_pages,
+            )
+            scribus.statusMessage(msg)
+            # Scribus getPageType: 2 for Right pages, 0 for Left pages
+            if scribus.getPageType(current_page) == 2:
+                draw_page("right", item)
+            elif scribus.getPageType(current_page) == 0:
+                draw_page("left", item)
+            else:
+                scribus.messageBox(
+                    ui_t("mainform_title"),
+                    fill(ui_t("err_unknown_page_type"), current_page=current_page),
+                    scribus.ICON_CRITICAL,
+                )
+                sys.exit(1)
+            if (current_page > 0) and (current_page % 4 == 0):
+                scribus.saveDoc()
     if scribus.haveDoc():
         scribus.saveDoc()
 
