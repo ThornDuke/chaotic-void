@@ -39,6 +39,17 @@ MOONECLIPSES = [
     "Total lunar eclipse",
 ]
 
+PLANETS = [
+    "Mercury",
+    "Venus",
+    "Moon",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune",
+]
+
 JPL_EPHEMERIS_FILE = "de440s.bsp"
 
 GOLDEN_RATIO = 1.61803

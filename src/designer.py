@@ -18,6 +18,7 @@ from .utilities import (
     generate_filename,
     save_to_file,
 )
+from . import constants
 
 # --temp / debug
 # from src.archivist import Logger
@@ -203,6 +204,9 @@ def createTextStyles():
     scribus.createParagraphStyle(
         "planets_left_par_style", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "text10_ch_style"
     )
+    scribus.createParagraphStyle(
+        "planets_events_par_style", 0, 14.25, 0, 0, 0, 0, 0, 0, 0, 0, 0, "text_ch_style"
+    )
 
 
 def draw_lines(side):
@@ -339,10 +343,8 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
         ("neptune", "I"),
     ]
 
-    # vengono stampati solo quelli che hanno un campo '_isvisible' = True
-    filtered_planets = list(
-        filter(lambda item: datadict.get(f"{item[0]}_isvisible", False), planets)
-    )
+    # vengono stampati solo quelli che hanno un campo '<planet>_set'
+    filtered_planets = list(filter(lambda item: f"{item[0]}_set" in datadict, planets))
 
     # --- 1. Draw planets Frame ---
     for i, (planet, sym) in enumerate(reversed(filtered_planets)):
@@ -362,15 +364,17 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
         scribus.selectText(0, 1, ephem_frame)
         scribus.setCharacterStyle("ephem_sym_ch_style")
 
-    # --- 2. Draw moon eclipse data, if present ---
-    # if "moon_eclipse_type_num" in datadict:
-    #     # moon_eclipse_type_num: 0 -> penumbral -> C; 1 -> parzial -> B; 2 -> total -> A
-    #     moonecl_text = f"<  {chr(67 - datadict['moon_eclipse_type_num'])}  {hour_min(datadict['moon_eclipse_time'])}"
-    #     moonecl_frame = scribus.createText(x_pos, y_pos - y_gap, 30, 3)
-    #     scribus.setText(moonecl_text, moonecl_frame)
-    #     scribus.setParagraphStyle("text_right_par_style", moonecl_frame)
-    #     scribus.selectText(0, 1, moonecl_frame)
-    #     scribus.setCharacterStyle("ephem_sym_ch_style")
+
+def draw_planet_events(x_pos, y_pos, str):
+    # devono entrare:
+    # eclissi di luna, opposizioni, congiunzioni, elongazioni
+    # str è una stringa inframezzata da '\n'
+    # vedi 'coutch.py
+
+    text_frame = scribus.createText(x_pos, y_pos, 100, 100)
+    scribus.setText(str, text_frame)
+    scribus.setParagraphStyle("text_right_par_style", text_frame)
+    scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, text_frame)
 
 
 def draw_page(side, items):
@@ -490,9 +494,9 @@ def draw_page(side, items):
 
 
 def get_main_year(data):
-    """Finds the primary year by looking for January 1st."""
+    """Finds the primary year by looking for February 1st."""
     first_day = next(
-        (item for item in data if item["month"] == 1 and item["day"] == 1), None
+        (item for item in data if item["month"] == 2 and item["day"] == 1), None
     )
     return first_day["year"] if first_day else None
 
@@ -542,14 +546,14 @@ def extract_planetary_events(input_data):
 
     for entry in input_data:
         # --- PASQUA ---
-        if entry.get("is_easter"):
+        if "is_easter" in entry:
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
             full_date_str = f"{entry['year']}-{m}-{d}"
             result["easter"] = full_date_str
 
         # --- EQUINOZI ---
-        if entry.get("season"):
+        if "season" in entry:
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
             full_date_str = f"{entry['year']}-{m}-{d}"
@@ -560,12 +564,12 @@ def extract_planetary_events(input_data):
         # --- PIANETI INTERNI ---
         for ip in ["mercury", "venus"]:
             # Congiunzioni
-            if entry.get(f"{ip}_oc_type"):
+            if f"{ip}_oc_type" in entry:
                 event = "INF_CONJ" if entry[f"{ip}_oc_type"] == "ic" else "SUP_CONJ"
                 result[ip].append({"date": entry[f"{ip}_oc_time"], "event": event})
 
             # Elongazioni massime
-            if entry.get(f"{ip}_elong_direction"):
+            if f"{ip}_elong_direction" in entry:
                 event = "MEE" if entry[f"{ip}_elong_direction"] == "east" else "MEW"
                 result[ip].append(
                     {
@@ -576,7 +580,7 @@ def extract_planetary_events(input_data):
                 )
 
         # --- LUNA (Eclissi) ---
-        if entry.get("moon_eclipse_type_num"):
+        if any(item.startswith("moon_eclipse_") for item in entry):
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
             full_date_str = f"{entry['year']}-{m}-{d} {entry['moon_eclipse_time']}"
@@ -591,7 +595,7 @@ def extract_planetary_events(input_data):
         # --- PIANETI ESTERNI ---
         # Congiunzioni
         for ep in ["mars", "jupiter", "saturn", "uranus", "neptune"]:
-            if entry.get(f"{ep}_oc_type"):
+            if f"{ep}_oc_type" in entry:
                 event = "CONJ" if entry[f"{ep}_oc_type"] == "c" else "OPP"
                 result[ep].append({"date": entry[f"{ep}_oc_time"], "event": event})
 
@@ -697,7 +701,7 @@ def drawSecondPage(data, language):
         text = item["event"].lower().replace("_", " ")
 
         # Logiche specifiche per pianeta
-        if p_key in ["mercury", "venus"] and item.get("degree"):
+        if p_key in ["mercury", "venus"] and "degree" in item:
             text += f" {item['degree']:.1f}°"
         elif p_key == "moon":
             moon_phases = ["C", "B", "A"]
@@ -706,21 +710,8 @@ def drawSecondPage(data, language):
         return text
 
     # --- SETUP ---
-    months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ]
     t = translator(language)
+    months = constants.MONTHS
     planets = extract_planetary_events(data)
 
     # --temp / debug
@@ -756,16 +747,7 @@ def drawSecondPage(data, language):
 
     # --- 2. SEZIONE PIANETI (Ciclo generico) ---
     # Lista ordinata delle chiavi dei pianeti da processare
-    planet_keys = [
-        "mercury",
-        "venus",
-        "moon",
-        "mars",
-        "jupiter",
-        "saturn",
-        "uranus",
-        "neptune",
-    ]
+    planet_keys = list(map(lambda p: p.lower(), constants.PLANETS))
 
     for p_key in planet_keys:
         items = planets.get(p_key)
@@ -828,35 +810,35 @@ def create_planner_A5(data, language):
     scribus.newPage(-1)
     drawSecondPage(data, language)
 
-    for item in page_data_list:
-        current_page = scribus.currentPage()
-        if current_page < total_pages:
-            scribus.newPage(-1)
-            pagesQty = scribus.pageCount()
-            # --temp / debug
-            # logger.log(f"starting page {current_page}")
-            # logger.logmem()
-            # --remove before release--/
-            msg = fill(
-                ui_t("planner_page_elaborating"),
-                pagesQty=pagesQty,
-                total_pages=total_pages,
-            )
-            scribus.statusMessage(msg)
-            # Scribus getPageType: 2 for Right pages, 0 for Left pages
-            if scribus.getPageType(current_page) == 2:
-                draw_page("right", item)
-            elif scribus.getPageType(current_page) == 0:
-                draw_page("left", item)
-            else:
-                scribus.messageBox(
-                    ui_t("mainform_title"),
-                    fill(ui_t("err_unknown_page_type"), current_page=current_page),
-                    scribus.ICON_CRITICAL,
-                )
-                sys.exit(1)
-            if (current_page > 0) and (current_page % 4 == 0):
-                scribus.saveDoc()
+    # for item in page_data_list:
+    #     current_page = scribus.currentPage()
+    #     if current_page < total_pages:
+    #         scribus.newPage(-1)
+    #         pagesQty = scribus.pageCount()
+    #         # --temp / debug
+    #         # logger.log(f"starting page {current_page}")
+    #         # logger.logmem()
+    #         # --remove before release--/
+    #         msg = fill(
+    #             ui_t("planner_page_elaborating"),
+    #             pagesQty=pagesQty,
+    #             total_pages=total_pages,
+    #         )
+    #         scribus.statusMessage(msg)
+    #         # Scribus getPageType: 2 for Right pages, 0 for Left pages
+    #         if scribus.getPageType(current_page) == 2:
+    #             draw_page("right", item)
+    #         elif scribus.getPageType(current_page) == 0:
+    #             draw_page("left", item)
+    #         else:
+    #             scribus.messageBox(
+    #                 ui_t("mainform_title"),
+    #                 fill(ui_t("err_unknown_page_type"), current_page=current_page),
+    #                 scribus.ICON_CRITICAL,
+    #             )
+    #             sys.exit(1)
+    #         if (current_page > 0) and (current_page % 4 == 0):
+    #             scribus.saveDoc()
     if scribus.haveDoc():
         scribus.saveDoc()
 
