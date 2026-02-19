@@ -6,6 +6,7 @@ managing page creation, drawing lines, and placing text frames for
 dates, holidays, astronomical data, and seasons.
 """
 
+import sys
 import datetime
 import re
 import scribus  # pyright: ignore[reportMissingImports]
@@ -326,40 +327,50 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
     y_gap = 4.983
 
     # Ordered list of planets to process
-    planets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]
+    planets = [
+        ("sun", "A"),
+        ("moon", "B"),
+        ("mercury", "C"),
+        ("venus", "D"),
+        ("mars", "E"),
+        ("jupiter", "F"),
+        ("saturn", "G"),
+        ("uranus", "H"),
+        ("neptune", "I"),
+    ]
+
+    # vengono stampati solo quelli che hanno un campo '_isvisible' = True
+    filtered_planets = list(
+        filter(lambda item: datadict.get(f"{item[0]}_isvisible", False), planets)
+    )
 
     # --- 1. Draw planets Frame ---
-    for i, planet in enumerate(planets):
-        current_y = y_pos + (y_gap * i)
-        # Symbols correspond to 'A' (Sun) through 'G' (Saturn).
-        # ord('A') is 65. We generate the char dynamically based on index.
-        symbol_char = chr(65 + i)
-        ephem_text = f"{symbol_char}"
-        is_visible = datadict.get(f"{planet}_isvisible", False)
-        if is_visible:
-            # specific keys retrieval
-            p_rise = datadict.get(f"{planet}_rise", "")
-            p_rise_time = hour_min(p_rise) if p_rise != "" else ""
-            p_transit = datadict.get(f"{planet}_transit", "")
-            p_transit_time = hour_min(p_transit) if p_transit != "" else ""
-            p_set = datadict.get(f"{planet}_set", "")
-            p_set_time = hour_min(p_set) if p_set != "" else ""
-            ephem_text = f"{symbol_char}  {p_rise_time}  {p_transit_time}  {p_set_time}"
-            ephem_frame = scribus.createText(x_pos, current_y, 30, 3)
-            scribus.setText(ephem_text, ephem_frame)
-            scribus.setParagraphStyle("text_right_par_style", ephem_frame)
-            scribus.selectText(0, 1, ephem_frame)
-            scribus.setCharacterStyle("ephem_sym_ch_style")
+    for i, (planet, sym) in enumerate(reversed(filtered_planets)):
+        current_y = y_pos - (y_gap * i)
+        ephem_text = f"{sym}"
+        # specific keys retrieval
+        p_rise = datadict.get(f"{planet}_rise", "")
+        p_rise_time = hour_min(p_rise) if p_rise != "" else ""
+        p_transit = datadict.get(f"{planet}_transit", "")
+        p_transit_time = hour_min(p_transit) if p_transit != "" else ""
+        p_set = datadict.get(f"{planet}_set", "")
+        p_set_time = hour_min(p_set) if p_set != "" else ""
+        ephem_text = f"{sym}  {p_rise_time}  {p_transit_time}  {p_set_time}"
+        ephem_frame = scribus.createText(x_pos, current_y, 30, 3)
+        scribus.setText(ephem_text, ephem_frame)
+        scribus.setParagraphStyle("text_right_par_style", ephem_frame)
+        scribus.selectText(0, 1, ephem_frame)
+        scribus.setCharacterStyle("ephem_sym_ch_style")
 
     # --- 2. Draw moon eclipse data, if present ---
-    if "moon_eclipse_type_num" in datadict:
-        # moon_eclipse_type_num: 0 -> penumbral -> C; 1 -> parzial -> B; 2 -> total -> A
-        moonecl_text = f"<  {chr(67 - datadict['moon_eclipse_type_num'])}  {hour_min(datadict['moon_eclipse_time'])}"
-        moonecl_frame = scribus.createText(x_pos, y_pos - y_gap, 30, 3)
-        scribus.setText(moonecl_text, moonecl_frame)
-        scribus.setParagraphStyle("text_right_par_style", moonecl_frame)
-        scribus.selectText(0, 1, moonecl_frame)
-        scribus.setCharacterStyle("ephem_sym_ch_style")
+    # if "moon_eclipse_type_num" in datadict:
+    #     # moon_eclipse_type_num: 0 -> penumbral -> C; 1 -> parzial -> B; 2 -> total -> A
+    #     moonecl_text = f"<  {chr(67 - datadict['moon_eclipse_type_num'])}  {hour_min(datadict['moon_eclipse_time'])}"
+    #     moonecl_frame = scribus.createText(x_pos, y_pos - y_gap, 30, 3)
+    #     scribus.setText(moonecl_text, moonecl_frame)
+    #     scribus.setParagraphStyle("text_right_par_style", moonecl_frame)
+    #     scribus.selectText(0, 1, moonecl_frame)
+    #     scribus.setCharacterStyle("ephem_sym_ch_style")
 
 
 def draw_page(side, items):
@@ -447,13 +458,13 @@ def draw_page(side, items):
 
         # Planets Ephemeris
         if side == "left":
-            draw_planets_ephemeris(101, 45.464 + (i * 60.537), items[i])
+            draw_planets_ephemeris(101, 75.362 + (i * 60.537), items[i])
 
     if side == "right":  # out of the cicle because draw a full page
-        draw_planets_ephemeris(108, 45.464, items[0])
-        draw_planets_ephemeris(108, 106.001, items[1])
-        draw_planets_ephemeris(47.324, 166.538, items[2])
-        draw_planets_ephemeris(108, 166.538, items[3])
+        draw_planets_ephemeris(108, 75.362, items[0])
+        draw_planets_ephemeris(108, 135.899, items[1])
+        draw_planets_ephemeris(47.324, 196.436, items[2])
+        draw_planets_ephemeris(108, 196.436, items[3])
 
     # Handle the 4th day specifically (left column of the last row)
     if side == "right":
@@ -817,31 +828,35 @@ def create_planner_A5(data, language):
     scribus.newPage(-1)
     drawSecondPage(data, language)
 
-    # for item in page_data_list:
-    #     current_page = scribus.currentPage()
-    #     if current_page < total_pages:
-    #         scribus.newPage(-1)
-    #         pagesQty = scribus.pageCount()
-    #         #--temp / debug
-    #         # logger.log(f"starting page {current_page}")
-    #         # logger.logmem()
-    #         #--remove before release--/
-    #         msg = fill(ui_t("planner_page_elaborating"), pagesQty=pagesQty, total_pages=total_pages)
-    #         scribus.statusMessage(msg)
-    #         # Scribus getPageType: 2 for Right pages, 0 for Left pages
-    #         if scribus.getPageType(current_page) == 2:
-    #             draw_page('right', item)
-    #         elif scribus.getPageType(current_page) == 0:
-    #             draw_page('left', item)
-    #         else:
-    #             scribus.messageBox(
-    #                 ui_t("mainform_title"),
-    #                 fill(ui_t("err_unknown_page_type"), current_page=current_page),
-    #                 scribus.ICON_CRITICAL,
-    #             )
-    #             sys.exit(1)
-    #         if ((current_page > 0) and (current_page % 4 == 0)):
-    #             scribus.saveDoc()
+    for item in page_data_list:
+        current_page = scribus.currentPage()
+        if current_page < total_pages:
+            scribus.newPage(-1)
+            pagesQty = scribus.pageCount()
+            # --temp / debug
+            # logger.log(f"starting page {current_page}")
+            # logger.logmem()
+            # --remove before release--/
+            msg = fill(
+                ui_t("planner_page_elaborating"),
+                pagesQty=pagesQty,
+                total_pages=total_pages,
+            )
+            scribus.statusMessage(msg)
+            # Scribus getPageType: 2 for Right pages, 0 for Left pages
+            if scribus.getPageType(current_page) == 2:
+                draw_page("right", item)
+            elif scribus.getPageType(current_page) == 0:
+                draw_page("left", item)
+            else:
+                scribus.messageBox(
+                    ui_t("mainform_title"),
+                    fill(ui_t("err_unknown_page_type"), current_page=current_page),
+                    scribus.ICON_CRITICAL,
+                )
+                sys.exit(1)
+            if (current_page > 0) and (current_page % 4 == 0):
+                scribus.saveDoc()
     if scribus.haveDoc():
         scribus.saveDoc()
 
