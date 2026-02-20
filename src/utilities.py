@@ -299,7 +299,15 @@ def generate_filename(prefix="", suffix="", ext=""):
 
 
 def save_to_file(data, filename):
+    """
+    Saves a Python object to a file in a human-readable format using pretty-print.
+
+    Args:
+        data (any): The data structure (list, dict, etc.) to be saved.
+        filename (str): The path or name of the file where the data will be stored.
+    """
+    # Format the data into a readable string, preserving the dictionary order
     formatted_data = pprint.pformat(data, sort_dicts=False)
+
     with open(filename, "w") as f:
         f.write(formatted_data)
-        f.close()
