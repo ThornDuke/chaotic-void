@@ -18,7 +18,7 @@ from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
 from . import constants
-from .utilities import fill, by_acronym
+from .utilities import fill, by_acronym, save_to_file, generate_filename
 
 ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
@@ -174,6 +174,57 @@ def max_elongation(body, year, language):
     return result
 
 
+def fill_eph_holes(data):
+    def get_mean_dt(dt1, dt2):
+        ts1 = dt1.timestamp()
+        ts2 = dt2.timestamp()
+        mean_ts = (ts1 + ts2) / 2
+        return datetime.datetime.fromtimestamp(mean_ts, tz=dt1.tzinfo)
+
+    if not data:
+        return data
+
+    # Ordiniamo per sicurezza i dati in base alla data
+    data.sort(key=lambda x: (x["year"], x["month"], x["day"]))
+
+    i = 0
+    while i < len(data) - 1:
+        current_date = datetime.datetime(
+            data[i]["year"], data[i]["month"], data[i]["day"]
+        ).date()
+        next_date = datetime.datetime(
+            data[i + 1]["year"], data[i + 1]["month"], data[i + 1]["day"]
+        ).date()
+
+        # Se la differenza tra i due giorni è maggiore di 1, manca qualcosa
+        if (next_date - current_date).days > 1:
+            # Calcoliamo la data del giorno mancante (quello subito dopo data[i])
+            missing_day_date = current_date + datetime.timedelta(days=1)
+
+            # Creiamo il nuovo dizionario "interpolato"
+            new_entry = {
+                "year": missing_day_date.year,
+                "month": missing_day_date.month,
+                "day": missing_day_date.day,
+                "moon_rise": get_mean_dt(
+                    data[i]["moon_rise"], data[i + 1]["moon_rise"]
+                ),
+                "moon_transit": get_mean_dt(
+                    data[i]["moon_transit"], data[i + 1]["moon_transit"]
+                ),
+                "moon_set": get_mean_dt(data[i]["moon_set"], data[i + 1]["moon_set"]),
+                "moon_isvisible": data[i]["moon_isvisible"],
+            }
+
+            # Inseriamo il dizionario mancante nella lista
+            data.insert(i + 1, new_entry)
+            # Non incrementiamo 'i' immediatamente per gestire eventuali buchi di più giorni
+        else:
+            i += 1
+
+    return data
+
+
 def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
     """
     Calculates the times of sunrise, transit and sunset of the sun
@@ -252,6 +303,12 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
             )
 
         date += delta
+
+    if object.lower() == "moon":
+        # @> temp / debug
+        # save_to_file(results, generate_filename(prefix="moon", ext=".py"))
+        # @> remove before release
+        results = fill_eph_holes(results)
 
     return results
 
