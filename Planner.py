@@ -53,7 +53,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 __program_name__ = "Planner"
-__version__ = "3.0.0"
+__version__ = "3.0.1"
 __author__ = "Sergio Spina"
 __email__ = "sergio.am.spina@gmail.com"
 __license__ = "GPLv3"

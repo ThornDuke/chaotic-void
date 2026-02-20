@@ -504,7 +504,7 @@ def draw_page(side, items):
         for planet, sym in planets:
             if f"{planet}_elong_time" in dct:
                 event_sign = (
-                    "mee" if dct[f"{planet}_elong_direction"] == "east" else "mew"
+                    "mee" if dct[f"{planet}_elong_direction"] == "east" else "mwe"
                 )
                 event_time = hour_min(dct[f"{planet}_elong_time"])
                 strings.append(f"{sym} {event_sign} h{event_time}")
@@ -688,7 +688,7 @@ def extract_planetary_events(input_data):
 
             # Maximum Elongations
             if f"{ip}_elong_direction" in entry:
-                event = "MEE" if entry[f"{ip}_elong_direction"] == "east" else "MEW"
+                event = "MEE" if entry[f"{ip}_elong_direction"] == "east" else "MWE"
                 result[ip].append(
                     {
                         "date": entry[f"{ip}_elong_time"],
@@ -773,7 +773,7 @@ def drawFirstPage(data, language):
     _draw_planet_frame(174.498, f"G  {t('saturn')}")
     _draw_planet_frame(178.626, f"H  {t('uranus')}")
     _draw_planet_frame(183.582, f"I  {t('neptune')}")
-    _draw_acronym_frame(148.992, f"mew  {t('maj_elon_west')}", "mew")
+    _draw_acronym_frame(148.992, f"mwe  {t('maj_elon_west')}", "mwe")
     _draw_acronym_frame(153.243, f"mee  {t('maj_elon_east')}", "mee")
     _draw_acronym_frame(157.494, f"sup conj  {t('sup_conj')}", "sup conj")
     _draw_acronym_frame(161.745, f"inf conj  {t('inf_conj')}", "inf conj")
