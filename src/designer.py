@@ -258,6 +258,16 @@ def split_list(input_list):
 
 
 def resize_height(frame):
+    """
+    Iteratively resizes the height of a Scribus text frame until the text
+    no longer overflows or the height reaches zero.
+
+    Args:
+        frame (str): The name of the Scribus object (text frame).
+
+    Returns:
+        int: The final calculated height of the frame.
+    """
     w, _ = scribus.getSize(frame)
     currh = 190
     step = 1
@@ -272,6 +282,16 @@ def resize_height(frame):
 
 
 def resize_width(frame):
+    """
+    Iteratively resizes the width of a Scribus text frame until the text
+    no longer overflows or the width reaches zero.
+
+    Args:
+        frame (str): The name of the Scribus object (text frame).
+
+    Returns:
+        int: The final calculated width of the frame.
+    """
     _, h = scribus.getSize(frame)
     currw = 120
     step = 1
@@ -395,7 +415,18 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
 
 
 def draw_planet_events(x_pos, y_pos, str):
+    """
+    Creates a text frame in Scribus for planetary events, applies styles,
+    and optimizes its height and position.
+
+    Args:
+        x_pos (float): The horizontal position.
+        y_pos (float): The vertical position.
+        str (str): The text content containing events and times.
+    """
+
     def chunk_idxs(curr_str):
+        """Calculates start positions and lengths of event names for styling."""
         results = []
         current_offset = 0
 
@@ -417,19 +448,21 @@ def draw_planet_events(x_pos, y_pos, str):
         return results
 
     if len(str) > 0:
-        # crea il frame di testo
+        # Create the text frame
         text_frame = scribus.createText(x_pos, y_pos, 29, 100)
         scribus.setText(str, text_frame)
         scribus.setParagraphStyle("planets_events_par_style", text_frame)
         scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, text_frame)
-        # aggiunge la formattazione per carattere
+
+        # Add character-level formatting
         idxs = chunk_idxs(str)
         for start, length in idxs:
             scribus.selectText(start - 2, 1, text_frame)
             scribus.setCharacterStyle("ephem_sym_ch_style")
             scribus.selectText(start, length, text_frame)
             scribus.setCharacterStyle("smallcaps_ch_style")
-        # ottimizza le dimensioni e lo posiziona con precisione
+
+        # Optimize dimensions and position it precisely
         frame_height = resize_height(text_frame)
         scribus.moveObjectAbs(x_pos, y_pos - frame_height - 0.365, text_frame)
 
@@ -605,7 +638,16 @@ def get_main_year(data):
 
 
 def extract_planetary_events(input_data):
-    # Struttura di base del risultato
+    """
+    Parses raw ephemeris data into a structured dictionary of astronomical events.
+
+    Args:
+        input_data (list[dict]): Raw data containing dates and event flags.
+
+    Returns:
+        dict: A dictionary categorized by planet/event type (e.g., 'mars', 'seasons').
+    """
+    # Basic result structure
     result = {
         "easter": "",
         "seasons": [],
@@ -620,14 +662,14 @@ def extract_planetary_events(input_data):
     }
 
     for entry in input_data:
-        # --- PASQUA ---
+        # --- EASTER ---
         if "is_easter" in entry:
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
             full_date_str = f"{entry['year']}-{m}-{d}"
             result["easter"] = full_date_str
 
-        # --- EQUINOZI ---
+        # --- EQUINOXES / SOLSTICES ---
         if "season" in entry:
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
@@ -636,14 +678,14 @@ def extract_planetary_events(input_data):
                 {"date": full_date_str, "event": entry["season_type"]}
             )
 
-        # --- PIANETI INTERNI ---
+        # --- INNER PLANETS ---
         for ip in ["mercury", "venus"]:
-            # Congiunzioni
+            # Conjunctions
             if f"{ip}_oc_type" in entry:
                 event = "INF_CONJ" if entry[f"{ip}_oc_type"] == "ic" else "SUP_CONJ"
                 result[ip].append({"date": entry[f"{ip}_oc_time"], "event": event})
 
-            # Elongazioni massime
+            # Maximum Elongations
             if f"{ip}_elong_direction" in entry:
                 event = "MEE" if entry[f"{ip}_elong_direction"] == "east" else "MEW"
                 result[ip].append(
@@ -654,7 +696,7 @@ def extract_planetary_events(input_data):
                     }
                 )
 
-        # --- LUNA (Eclissi) ---
+        # --- MOON (Eclipses) ---
         if any(item.startswith("moon_eclipse_") for item in entry):
             m = str(entry["month"]).zfill(2)
             d = str(entry["day"]).zfill(2)
@@ -667,8 +709,8 @@ def extract_planetary_events(input_data):
                 }
             )
 
-        # --- PIANETI ESTERNI ---
-        # Congiunzioni
+        # --- OUTER PLANETS ---
+        # Conjunctions and Oppositions
         for ep in ["mars", "jupiter", "saturn", "uranus", "neptune"]:
             if f"{ep}_oc_type" in entry:
                 event = "CONJ" if entry[f"{ep}_oc_type"] == "c" else "OPP"
@@ -678,6 +720,14 @@ def extract_planetary_events(input_data):
 
 
 def drawFirstPage(data, language):
+    """
+    Generates the first page of the astronomical calendar including title and legend.
+
+    Args:
+        data (list): The ephemeris data.
+        language (str): Language code for translation.
+    """
+
     def _draw_planet_frame(ypos, text):
         text_frame = scribus.createText(
             17, ypos, 60 if not text.startswith("<") else 120, 3.5
@@ -740,9 +790,18 @@ def drawFirstPage(data, language):
 
 
 def drawSecondPage(data, language):
+    """
+    Generates the second page of the calendar with detailed event tables
+    for Easter, seasons, and planets.
+
+    Args:
+        data (list): The ephemeris data.
+        language (str): Language code for translation.
+    """
+
     # --- HELPER FUNCTIONS ---
     def _get_date_parts(date_obj_or_str):
-        """Restituisce le parti della data (Y, m, d, H, M, S). Accetta datetime o str."""
+        """Returns date parts (Y, m, d, H, M, S). Accepts datetime or string."""
         if isinstance(date_obj_or_str, str):
             try:
                 dt = datetime.datetime.strptime(date_obj_or_str, "%Y-%m-%d %H:%M:%S.%f")
@@ -761,21 +820,19 @@ def drawSecondPage(data, language):
         )
 
     def _draw_frame(x, y, w, h, text, style):
-        """Crea un frame Scribus, imposta testo e stile, ridimensiona e restituisce l'altezza."""
+        """Creates a Scribus frame, sets text/style, resizes it and returns height."""
         if not text:
             return 0
         frame = scribus.createText(x, y, w, h)
         scribus.setText(text, frame)
         scribus.setParagraphStyle(style, frame)
-        return resize_height(
-            frame
-        )  # Assumo che questa funzione esista nel contesto globale
+        return resize_height(frame)
 
     def _format_event_line(item, p_key):
-        """Formatta la riga dell'evento per la colonna centrale."""
+        """Formats the event line for the central column."""
         text = item["event"].lower().replace("_", " ")
 
-        # Logiche specifiche per pianeta
+        # Specific logic per planet
         if p_key in ["mercury", "venus"] and "degree" in item:
             text += f" {item['degree']:.1f}°"
         elif p_key == "moon":
@@ -797,17 +854,17 @@ def drawSecondPage(data, language):
     current_y = 10
     y_gap = 2
 
-    # --- 1. SEZIONE PASQUA ED EQUINOZI (Gestita a parte per formato diverso) ---
+    # --- 1. EASTER AND SEASONS SECTION (Handled separately for formatting) ---
     left_text = "\n".join(
         [t("easter"), t("eq_spring"), t("eq_summer"), t("eq_autumn"), t("eq_winter")]
     )
 
     right_lines = []
-    # Pasqua
+    # Easter
     if "easter" in planets:
         _, m, d, _, _, _ = _get_date_parts(planets["easter"])
         right_lines.append(f"{d} {t(months[int(m) - 1])}")
-    # Stagioni
+    # Seasons
     if "seasons" in planets:
         for season in planets["seasons"]:
             _, m, d, _, _, _ = _get_date_parts(season["date"])
@@ -820,8 +877,8 @@ def drawSecondPage(data, language):
 
     current_y += max(h_left, h_right) + y_gap
 
-    # --- 2. SEZIONE PIANETI (Ciclo generico) ---
-    # Lista ordinata delle chiavi dei pianeti da processare
+    # --- 2. PLANETS SECTION (Generic Loop) ---
+    # Ordered list of planet keys to process
     planet_keys = list(map(lambda p: p.lower(), constants.PLANETS))
 
     for p_key in planet_keys:
@@ -829,32 +886,32 @@ def drawSecondPage(data, language):
         if not items:
             continue
 
-        # Preparazione testi
-        # Sinistra: Nome pianeta
+        # Prepare texts
+        # Left: Planet Name
         text_left = t(p_key)
 
-        # Centro: Descrizione eventi
+        # Center: Event descriptions
         center_lines = [_format_event_line(item, p_key) for item in items]
         text_center = "\n".join(center_lines)
 
-        # Destra: Date e Ore
+        # Right: Dates and Hours
         right_lines = []
         for item in items:
-            # Gestisce sia datetime objects che stringhe nel dizionario originale
+            # Handle both datetime objects and strings in the original dictionary
             d_obj = item["date"]
             _, m, d, H, M, _ = _get_date_parts(d_obj)
             right_lines.append(f"{d} {t(months[int(m) - 1])} h{H}:{M}")
         text_right = "\n".join(right_lines)
 
-        # Disegno frames
-        # Nota: usiamo current_y calcolato dal blocco precedente
+        # Draw frames
+        # Note: using current_y calculated from previous block
         h_l = _draw_frame(10, current_y, 40, 100, text_left, "planets_bold_par_style")
         h_c = _draw_frame(
             51, current_y, 30, 100, text_center, "planets_smallcaps_par_style"
         )
         h_r = _draw_frame(82, current_y, 49, 100, text_right, "planets_left_par_style")
 
-        # Aggiornamento Y per il prossimo giro
+        # Update Y for the next iteration
         current_y += max(h_l, h_c, h_r) + y_gap
 
 
