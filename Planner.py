@@ -53,11 +53,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 __program_name__ = "Planner"
-__version__ = "2.2.5"
+__version__ = "3.0.0"
 __author__ = "Sergio Spina"
 __email__ = "sergio.am.spina@gmail.com"
 __license__ = "GPLv3"
-__date__ = "2026-02-11"
+__date__ = "2026-02-20"
 
 import sys
 import datetime

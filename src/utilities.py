@@ -28,7 +28,7 @@ def fill(template, **replacements):
                 the provided keyword arguments.
 
     Example:
-      >>> replace_placeholders_by_key("The {{item}} costs {{price}}", item="ball", price=10)
+      >>> fill("The {{item}} costs {{price}}", item="ball", price=10)
       'The ball costs 10'
     """
 
@@ -183,11 +183,11 @@ def check_requirements():
     # --- Fonts ---
     report["fonts"] = font_availability(FONTS)
 
-    # @> temp / debug
+    # === temp / debug
     # with open('report.txt', 'w') as rf:
     #   for item in report:
     #     rf.write(f"{item}: {report[item]}\n")
-    # @> remove before release
+    # === remove before release
 
     return report
 

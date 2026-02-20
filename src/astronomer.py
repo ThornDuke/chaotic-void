@@ -18,7 +18,14 @@ from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
 from . import constants
-from .utilities import fill, by_acronym, save_to_file, generate_filename
+from .utilities import (
+    fill,
+    by_acronym,
+    # === temp / debug
+    # save_to_file,
+    # generate_filename,
+    # === remove before release
+)
 
 ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
@@ -354,9 +361,9 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
         date += delta
 
     if object.lower() == "moon":
-        # @> temp / debug
+        # === temp / debug
         # save_to_file(results, generate_filename(prefix="moon", ext=".py"))
-        # @> remove before release
+        # === remove before release
         results = fill_eph_holes(results)
 
     return results
