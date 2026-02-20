@@ -24,6 +24,19 @@ ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
 def bsp_alias(planet_name, data):
+    """
+    Search for a planet's name or its barycenter alias within the SPICE kernel data.
+
+    Args:
+        planet_name (str): The name of the planet to search for.
+        data: The JPL ephemeris data object containing names and codes.
+
+    Returns:
+        namedtuple: A PlanetResult containing 'name' and 'code'.
+
+    Raises:
+        ValueError: If neither the planet name nor its barycenter is found in the data.
+    """
     PlanetResult = namedtuple("PlanetResult", ["name", "code"])
 
     search_name = planet_name.upper()
@@ -50,6 +63,18 @@ def bsp_alias(planet_name, data):
 
 
 def opposition_conjunction(body, year, language):
+    """
+    Calculate the dates and times of astronomical oppositions and conjunctions
+    for a given celestial body and year.
+
+    Args:
+        body (str): The name of the planet (e.g., 'Mars', 'Venus').
+        year (int): The reference year for the search.
+        language (str): Language code for translation and timezone settings.
+
+    Returns:
+        list[dict]: A list of dictionaries containing the event date, time, and type.
+    """
     t = translator(language)
     timezone = ZoneInfo(t("timezone"))
 
@@ -117,6 +142,25 @@ def opposition_conjunction(body, year, language):
 
 
 def max_elongation(body, year, language):
+    """
+    Find the dates of maximum elongation (eastern or western) for inner planets.
+
+    Args:
+        body (str): The name of the planet (must be 'Mercury' or 'Venus').
+        year (int): The reference year for the search.
+        language (str): Language code for translation and timezone settings.
+
+    Returns:
+        list[dict]: A list of dictionaries containing the date, time,
+                   degrees of elongation, and direction.
+    """
+
+    def elongation_at(t):
+        e = earth.at(t)
+        s = e.observe(sun).apparent()
+        cb = e.observe(curr_body).apparent()
+        return s.separation_from(cb).degrees
+
     l_body = body.lower()
     if l_body not in ["venus", "mercury"]:
         raise ValueError(ui_t("err_bad_elongation_target"))
@@ -140,12 +184,6 @@ def max_elongation(body, year, language):
 
     object = bsp_alias(body, eph)
     sun, earth, curr_body = eph["sun"], eph["earth"], eph[object.name]
-
-    def elongation_at(t):
-        e = earth.at(t)
-        s = e.observe(sun).apparent()
-        cb = e.observe(curr_body).apparent()
-        return s.separation_from(cb).degrees
 
     elongation_at.step_days = 15.0
 
@@ -175,6 +213,17 @@ def max_elongation(body, year, language):
 
 
 def fill_eph_holes(data):
+    """
+    Detect missing days in the dataset and fill them using linear interpolation
+    for moon-related times.
+
+    Args:
+        data (list[dict]): A list of dictionaries representing daily ephemeris data.
+
+    Returns:
+        list[dict]: The list with missing entries filled.
+    """
+
     def get_mean_dt(dt1, dt2):
         ts1 = dt1.timestamp()
         ts2 = dt2.timestamp()
@@ -184,7 +233,7 @@ def fill_eph_holes(data):
     if not data:
         return data
 
-    # Ordiniamo per sicurezza i dati in base alla data
+    # Sort data by date for safety
     data.sort(key=lambda x: (x["year"], x["month"], x["day"]))
 
     i = 0
@@ -196,12 +245,12 @@ def fill_eph_holes(data):
             data[i + 1]["year"], data[i + 1]["month"], data[i + 1]["day"]
         ).date()
 
-        # Se la differenza tra i due giorni è maggiore di 1, manca qualcosa
+        # If the difference between the two days is greater than 1, something is missing
         if (next_date - current_date).days > 1:
-            # Calcoliamo la data del giorno mancante (quello subito dopo data[i])
+            # Calculate the date of the missing day (the one immediately after data[i])
             missing_day_date = current_date + datetime.timedelta(days=1)
 
-            # Creiamo il nuovo dizionario "interpolato"
+            # Create the new "interpolated" dictionary
             new_entry = {
                 "year": missing_day_date.year,
                 "month": missing_day_date.month,
@@ -216,9 +265,9 @@ def fill_eph_holes(data):
                 "moon_isvisible": data[i]["moon_isvisible"],
             }
 
-            # Inseriamo il dizionario mancante nella lista
+            # Insert the missing dictionary into the list
             data.insert(i + 1, new_entry)
-            # Non incrementiamo 'i' immediatamente per gestire eventuali buchi di più giorni
+            # Do not increment 'i' immediately to handle potential gaps of multiple days
         else:
             i += 1
 
