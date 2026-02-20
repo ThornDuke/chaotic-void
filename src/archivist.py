@@ -21,7 +21,7 @@ class Logger:
         self.filename = generate_filename(prefix="CAL", ext=".log")
         self.process_id = psutil.Process(os.getpid())
 
-        # Inizializziamo il riferimento temporale per il calcolo del delta
+        # Initialize the time reference for calculating the delta
         self.last_log_time = now
 
         with open(self.filename, "w", encoding="utf-8") as f:
@@ -35,20 +35,20 @@ class Logger:
         """
         now = datetime.datetime.now()
 
-        # Calcolo della differenza di tempo
+        # Calculate the time difference
         elapsed = now - self.last_log_time
-        # Formattiamo il delta (es: 0:00:05.123456)
+        # Format the delta (e.g., 0:00:05.123456)
         delta_str = str(elapsed)
 
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        # Costruiamo l'entrata includendo il delta
+        # Build the entry including the delta
         log_entry = f"[{timestamp}] (+{delta_str})\n{message}\n\n"
 
         with open(self.filename, "a", encoding="utf-8") as f:
             f.write(log_entry)
 
-        # Aggiorniamo l'ultimo timestamp per la prossima chiamata
+        # Update the last timestamp for the next call
         self.last_log_time = now
 
     def logmem(self):
