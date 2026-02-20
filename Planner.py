@@ -79,7 +79,7 @@ import src.designer as designer
 from src.translator import translator, by_acronym
 from src.utilities import fill, check_requirements, validate_requirements
 
-# Inizializzazione traduttore
+# Translator initialization
 t = translator(by_acronym(scribus.getGuiLanguage()))
 
 
@@ -89,7 +89,7 @@ def main() -> None:
     if not validate_requirements(sys_report):
         return
 
-    # edition contiene {'year': int, 'language': str}
+    # edition contains {‘year’: int, ‘language’: str}
     edition = mainform.get_planner_edition()
     if edition == None:
         return
@@ -98,7 +98,7 @@ def main() -> None:
         process_start = datetime.datetime.now().replace(microsecond=0)
         year = edition["year"]
         language = edition["language"]
-        # Generazione dati e creazione layout
+        # Data generation and layout creation
         calendar_data = calendarist.generate_full_calendar(year, language)
         designer.create_planner_A5(calendar_data, language)
         scribus.setInfo("Sergio Spina", "A5 Planner", f"Planner A5 for the year {year}")
