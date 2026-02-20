@@ -376,12 +376,6 @@ def merge_calendar_data(target_list, **data_sources):
     return result
 
 
-def notify(progess_index: int, message: str):
-    t = translator(by_acronym(scribus.getGuiLanguage()))
-    scribus.progressSet(progess_index)
-    scribus.statusMessage(t(message))
-
-
 def print_as_json(data, filename):
     """
     Writes a list of dictionaries to a text file in a JSON-like format.
@@ -434,6 +428,12 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     Returns:
       list[dict]: The final calendar dataset ready for rendering.
     """
+
+    def notify(progess_index: int, message: str):
+        t = translator(by_acronym(scribus.getGuiLanguage()))
+        scribus.progressSet(progess_index)
+        scribus.statusMessage(t(message))
+
     t = translator(language)
 
     # Generate core date structures
