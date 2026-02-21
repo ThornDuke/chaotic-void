@@ -10,7 +10,7 @@ import sys
 import datetime
 import re
 import scribus  # pyright: ignore[reportMissingImports]
-from .data.lines import get_A5_line_data
+from .lines import get_A5_line_data
 from .translator import translator, by_acronym
 from .utilities import (
     fill,
@@ -221,14 +221,12 @@ def draw_lines(side):
     line_data = get_A5_line_data(side)
     for data in line_data:
         line = scribus.createLine(
-            data["x"], data["y"], data["x"] + data["w"], data["y"]
+            data["ax"],
+            data["ay"],
+            data["bx"],
+            data["by"],
         )
         scribus.setCustomLineStyle("thick" if data["th"] == 1 else "thin", line)
-
-    if side == "right":
-        # Additional vertical separator for the right page (weekend section)
-        vline = scribus.createLine(77.5, 139.361, 77.5, 139.361 + 60.639)
-        scribus.setCustomLineStyle("thin", vline)
 
 
 def split_list(input_list):

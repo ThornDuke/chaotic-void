@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 Planner
 
 Scribus script for astronomical diary generation.
@@ -18,14 +18,14 @@ and the language in which to write the texts. Once you click
 
 REQUIREMENTS
 
-* Scribus 1.6.1 or higher
-* Python 3.12.3
-* Tkinter 8.6
-* PyEphem 4.1.5 library for moon phases calculations <https://rhodesmill.org/pyephem/>
-* SkyField 1.48 library for the calculation of the sun and
-  planets positions and for the moon eclypses <https://rhodesmill.org/skyfield/>
-* Simoncini Garamond Std font for text
-* Symbola font for moon and sun symbols
+    * Scribus 1.6.1 or higher
+    * Python 3.12.3
+    * Tkinter 8.6
+    * PyEphem 4.1.5 library for moon phases calculations <https://rhodesmill.org/pyephem/>
+    * SkyField 1.48 library for the calculation of the sun and
+    planets positions and for the moon eclypses <https://rhodesmill.org/skyfield/>
+    * Simoncini Garamond Std font for text
+    * Symbola font for moon and sun symbols
 
 When first run, Skyfield will automatically download the file
 “de440s.bsp” (approximately 30MB) from a NASA server if it is
