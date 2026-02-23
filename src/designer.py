@@ -10,7 +10,7 @@ import sys
 import datetime
 import re
 import scribus  # pyright: ignore[reportMissingImports]
-from .lines import get_A5_line_data
+from .lines import get_A5_1w2p_line_data
 from .translator import translator, by_acronym
 from .utilities import (
     fill,
@@ -218,7 +218,7 @@ def draw_lines(side):
     Args:
       side (str): 'left' or 'right' to determine line coordinates and specific vertical lines.
     """
-    line_data = get_A5_line_data(side)
+    line_data = get_A5_1w2p_line_data(side)
     for data in line_data:
         line = scribus.createLine(
             data["ax"],
