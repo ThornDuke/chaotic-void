@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 holidays = [
     {
         "month": 12,
