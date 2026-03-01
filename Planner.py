@@ -65,22 +65,27 @@ import datetime
 try:
     import scribus  # pyright: ignore[reportMissingImports]
 except ImportError:
-    print(
-        f"\n{__program_name__} v. {__version__}"
-        + "\n\nThis script will only run within the"
-        + "\nPython interpreter embedded in Scribus."
-        + "\nTry Script -> Execute Script.\n"
+    no_scribus_msg = (
+        "\n"
+        "│\n"
+        f"│  {__program_name__} v. {__version__}\n"
+        "│\n"
+        "│  This script will only run within the\n"
+        "│  Python interpreter embedded in Scribus.\n"
+        "│  Try Script -> Execute Script.\n"
+        "│\n"
     )
+    print(no_scribus_msg)
     sys.exit(1)
 
 import src.mainform as mainform
 import src.calendarist as calendarist
 import src.designer as designer
-from src.translator import translator, by_acronym
+from src.translator import translator
 from src.utilities import fill, check_requirements, validate_requirements
 
 # Translator initialization
-t = translator(by_acronym(scribus.getGuiLanguage()))
+t = translator(scribus.getGuiLanguage())
 
 
 def main() -> None:
@@ -105,8 +110,8 @@ def main() -> None:
         process_end: datetime.datetime = datetime.datetime.now().replace(microsecond=0)
         duration: datetime.timedelta = process_end - process_start
         scribus.messageBox(
-            "Planner Generator",
-            fill(t("good_outcome"), processing_time=duration),
+            t("gui.endform.title"),
+            fill(t("gui.endform.outcome"), processing_time=duration),
             scribus.ICON_INFORMATION,
         )
     finally:

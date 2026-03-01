@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Agenda : élaboration de la page {{pagesQty}} sur {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "L'agenda a été traité correctement !\n\nTemps de traitement : {{processing_time}}"
     }
   },

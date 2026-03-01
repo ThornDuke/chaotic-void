@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Планнер: обработка страницы {{pagesQty}} из {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Планнер успешно обработан!\n\nВремя обработки: {{processing_time}}"
     }
   },

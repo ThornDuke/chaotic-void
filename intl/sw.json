@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Kalenda: kuchakata ukurasa wa {{pagesQty}} kati ya {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Kalenda imechakatwa kikamilifu!\n\nMuda wa uchakataji: {{processing_time}}"
     }
   },

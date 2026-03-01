@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Kalenteri: käsitellään sivua {{pagesQty}} / {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Kalenteri on käsitelty onnistuneesti!\n\nKäsittelyaika: {{processing_time}}"
     }
   },

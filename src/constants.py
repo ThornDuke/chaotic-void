@@ -47,7 +47,9 @@ PLANETS = [
     "Jupiter",
     "Saturn",
     "Uranus",
-    "Neptune",
+    # ::: temp/debug :::
+    # "Neptune",
+    # ::: remove before release :::
 ]
 
 JPL_EPHEMERIS_FILE = "de440s.bsp"

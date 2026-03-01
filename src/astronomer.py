@@ -8,7 +8,11 @@ holidays (Easter) using the 'astral' and 'pyephem' libraries.
 
 import sys
 import datetime
-from zoneinfo import ZoneInfo
+
+# ::: temp/debug :::
+# from zoneinfo import ZoneInfo
+# ::: remove before release :::
+from pytz import timezone
 from collections import namedtuple
 import scribus  # pyright: ignore[reportMissingImports]
 from skyfield import almanac, eclipselib
@@ -17,17 +21,17 @@ from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
+from .data.localities import localities
 from . import constants
 from .utilities import (
     fill,
-    by_acronym,
     # ::: temp/debug :::
     # save_to_file,
     # generate_filename,
     # ::: remove before release :::
 )
 
-ui_t = translator(by_acronym(scribus.getGuiLanguage()))
+ui_t = translator(scribus.getGuiLanguage())
 
 
 def bsp_alias(planet_name, data):
@@ -66,7 +70,7 @@ def bsp_alias(planet_name, data):
     if barycenter_match:
         return barycenter_match
 
-    raise ValueError(fill(ui_t("err_planet_not_present"), planet_name=planet_name))
+    raise ValueError(fill(ui_t("err.planetNotPresent"), planet_name=planet_name))
 
 
 def opposition_conjunction(body, year, language):
@@ -83,7 +87,7 @@ def opposition_conjunction(body, year, language):
         list[dict]: A list of dictionaries containing the event date, time, and type.
     """
     t = translator(language)
-    timezone = ZoneInfo(t("timezone"))
+    zone = timezone(localities[language]["timezone"])
 
     l_body = body.lower()
     if l_body not in [
@@ -95,15 +99,15 @@ def opposition_conjunction(body, year, language):
         "mercury",
         "venus",
     ]:
-        raise ValueError(ui_t("err_bad_opposition_target"))
+        raise ValueError(ui_t("err.badOppositionTarget"))
 
     ts = load.timescale()
     try:
         planets = load(constants.JPL_EPHEMERIS_FILE)
     except (IOError, ValueError) as e:
         scribus.messageBox(
-            ui_t("mainform_title"),
-            fill(ui_t("err_bsp_data_loading"), error=e),
+            ui_t("gui.mainform.title"),
+            fill(ui_t("err.bspDataLoading"), error=e),
             scribus.ICON_CRITICAL,
         )
         sys.exit()
@@ -117,7 +121,7 @@ def opposition_conjunction(body, year, language):
 
     result = []
     for ti, yi in zip(t, y):
-        tz_time = ti.astimezone(timezone)
+        tz_time = ti.astimezone(zone)
         oc = int(f"{yi}")
         # oc_type:  ic -> inferior conjunction
         #           sc -> superior conjunction
@@ -170,10 +174,10 @@ def max_elongation(body, year, language):
 
     l_body = body.lower()
     if l_body not in ["venus", "mercury"]:
-        raise ValueError(ui_t("err_bad_elongation_target"))
+        raise ValueError(ui_t("err.badElongationTarget"))
 
     t = translator(language)
-    timezone = ZoneInfo(t("timezone"))
+    zone = timezone(localities[language]["timezone"])
 
     ts = load.timescale()
     t0 = ts.utc(year - 1)
@@ -183,8 +187,8 @@ def max_elongation(body, year, language):
         eph = load(constants.JPL_EPHEMERIS_FILE)
     except (IOError, ValueError) as e:
         scribus.messageBox(
-            ui_t("mainform_title"),
-            fill(ui_t("err_bsp_data_loading"), error=e),
+            ui_t("gui.mainform.title"),
+            fill(ui_t("err.bspDataLoading"), error=e),
             scribus.ICON_CRITICAL,
         )
         sys.exit()
@@ -204,7 +208,7 @@ def max_elongation(body, year, language):
         _, vlon, _ = e.observe(curr_body).apparent().frame_latlon(ecliptic_frame)
         is_east = (vlon.degrees - slon.degrees) % 360.0 < 180.0
         direction = "east" if is_east else "west"
-        tz_t = t.astimezone(timezone)
+        tz_t = t.astimezone(zone)
         result.append(
             {
                 "year": t.utc.year,
@@ -298,10 +302,10 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
     Returns:
       list[dict]: daily list of dictionaries.
     """
-    t = translator(language)
-    timezone = ZoneInfo(t("timezone"))
-    latitude = t("latitude")
-    longitude = t("longitude")
+    localInfo = localities[language]
+    zone = timezone(localInfo["timezone"])
+    latitude = localInfo["latitude"]
+    longitude = localInfo["longitude"]
 
     ts = load.timescale()
 
@@ -309,8 +313,8 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
         eph = load(constants.JPL_EPHEMERIS_FILE)
     except (IOError, ValueError) as e:
         scribus.messageBox(
-            ui_t("mainform_title"),
-            fill(ui_t("err_bsp_data_loading"), error=e),
+            ui_t("gui.mainform.title"),
+            fill(ui_t("err.bspDataLoading"), error=e),
             scribus.ICON_CRITICAL,
         )
         sys.exit()
@@ -333,19 +337,25 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
         t0 = ts.utc(date.year, date.month, date.day, 0)
         t1 = ts.utc(date.year, date.month, date.day, 23, 59, 59)
 
-        object_rise_times, _ = almanac.find_risings(observer, target, t0, t1)
-        object_transit_times = almanac.find_transits(observer, target, t0, t1)
-        object_set_times, are_sets_visibles = almanac.find_settings(
+        object_rise_times, are_rises_visibles = almanac.find_risings(
             observer, target, t0, t1
         )
+        object_transit_times = almanac.find_transits(observer, target, t0, t1)
+        object_set_times, _ = almanac.find_settings(observer, target, t0, t1)
 
         prefix = object.lower().split()[0]
         for ort, ott, ost, isvisible in zip(
-            object_rise_times, object_transit_times, object_set_times, are_sets_visibles
+            object_rise_times,
+            object_transit_times,
+            object_set_times,
+            # ::: temp/debug :::
+            # are_sets_visibles
+            # ::: remove before release :::
+            are_rises_visibles,
         ):  # pyright: ignore[reportArgumentType]
-            time_ort = ort.astimezone(timezone)
-            time_ott = ott.astimezone(timezone)
-            time_ost = ost.astimezone(timezone)
+            time_ort = ort.astimezone(zone)
+            time_ott = ott.astimezone(zone)
+            time_ost = ost.astimezone(zone)
             results.append(
                 {
                     "year": date.year,
@@ -445,7 +455,7 @@ def get_easter_day(year):
       ValueError: If the year is before the introduction of the Gregorian calendar.
     """
     if year < 1583:
-        raise ValueError(ui_t("err_easter_overflow"))
+        raise ValueError(ui_t("err.easterOverflow"))
 
     # Meeus/Jones/Butcher Algorithm
     a = year % 19
@@ -466,21 +476,21 @@ def get_easter_day(year):
     return {"year": year, "month": month, "day": day, "iseaster": True}
 
 
-def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
+def get_mooneclipses_data(year: int, zone: str) -> list[dict]:
     """
-    Calculates lunar eclipse data for a given year and timezone.
+    Calculates lunar eclipse data for a given year and zone.
 
     This function searches for lunar eclipses starting from December of the previous
     year through January of the following year to ensure all eclipses relevant to
-    the requested year (accounting for timezone shifts) are captured.
+    the requested year (accounting for zone shifts) are captured.
 
     Args:
       year (int): The calendar year for which to retrieve eclipse data (e.g., 2026).
-      timezone (str): A valid IANA timezone string (e.g., 'Europe/Rome', 'UTC').
+      zone (str): A valid IANA zone string (e.g., 'Europe/Rome', 'UTC').
 
     Returns:
       list[dict]: A list of dictionaries, where each dictionary contains:
-        - year (int): The year of the eclipse in the local timezone.
+        - year (int): The year of the eclipse in the local zone.
         - month (int): The month of the eclipse.
         - day (int): The day of the eclipse.
         - time (datetime.time): The specific time of the eclipse (rounded to the minute).
@@ -498,8 +508,8 @@ def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
         eph = load(constants.JPL_EPHEMERIS_FILE)
     except Exception as e:
         scribus.messageBox(
-            ui_t("mainform_title"),
-            fill(ui_t("err_bsp_data_loading"), error=e),
+            ui_t("gui.mainform.title"),
+            fill(ui_t("err.bspDataLoading"), error=e),
             scribus.ICON_CRITICAL,
         )
         sys.exit()
@@ -510,7 +520,7 @@ def get_mooneclipses_data(year: int, timezone: str) -> list[dict]:
 
     results = []
     for ti, yi in zip(t, y):
-        eclipse_datetime = ti.astimezone(ZoneInfo(timezone))
+        eclipse_datetime = ti.astimezone(timezone(zone))
         results.append(
             {
                 "year": eclipse_datetime.year,

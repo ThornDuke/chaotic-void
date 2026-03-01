@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Agenda: elaborant la pàgina {{pagesQty}} de {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "L'agenda s'ha processat correctament!\n\nTemps de processament: {{processing_time}}"
     }
   },

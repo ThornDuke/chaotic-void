@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Napló: {{pagesQty}} / {{total_pages}} oldal feldolgozása"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "A határidőnapló sikeresen feldolgozva!\n\nFeldolgozási idő: {{processing_time}}"
     }
   },

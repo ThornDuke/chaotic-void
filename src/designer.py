@@ -11,7 +11,7 @@ import datetime
 import re
 import scribus  # pyright: ignore[reportMissingImports]
 from .lines import get_A5_1w2p_line_data
-from .translator import translator, by_acronym
+from .translator import translator
 from .utilities import (
     fill,
     round_dt_to_min,
@@ -20,13 +20,14 @@ from .utilities import (
     # save_to_file,
     # ::: remove before release :::
 )
+from .data.localities import localities
 from . import constants
 
 # ::: temp/debug :::
 # from src.archivist import Logger
 # ::: remove before release :::
 
-ui_t = translator(by_acronym(scribus.getGuiLanguage()))
+ui_t = translator(scribus.getGuiLanguage())
 
 
 def hour_min(dt):
@@ -388,7 +389,9 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
         ("jupiter", "F"),
         ("saturn", "G"),
         ("uranus", "H"),
-        ("neptune", "I"),
+        # ::: temp/debug :::
+        # ("neptune", "I"),
+        # ::: remove before release :::
     ]
 
     # vengono stampati solo quelli che hanno un campo '<planet>_set'
@@ -489,7 +492,9 @@ def draw_page(side, items):
             ("jupiter", "F"),
             ("saturn", "G"),
             ("uranus", "H"),
-            ("neptune", "I"),
+            # ::: temp/debug :::
+            # ("neptune", "I"),
+            # ::: remove before release :::
         ]
         conj_types = {"o": "opp", "c": "conj", "sc": "sup conj", "ic": "inf conj"}
         eclipse_types = {
@@ -657,7 +662,9 @@ def extract_planetary_events(input_data):
         "jupiter": [],
         "saturn": [],
         "uranus": [],
-        "neptune": [],
+        # ::: temp/debug :::
+        # "neptune": [],
+        # ::: remove before release :::
     }
 
     for entry in input_data:
@@ -710,7 +717,15 @@ def extract_planetary_events(input_data):
 
         # --- OUTER PLANETS ---
         # Conjunctions and Oppositions
-        for ep in ["mars", "jupiter", "saturn", "uranus", "neptune"]:
+        for ep in [
+            "mars",
+            "jupiter",
+            "saturn",
+            "uranus",
+            # ::: temp/debug :::
+            # "neptune",
+            # ::: remove before release :::
+        ]:
             if f"{ep}_oc_type" in entry:
                 event = "CONJ" if entry[f"{ep}_oc_type"] == "c" else "OPP"
                 result[ep].append({"date": entry[f"{ep}_oc_time"], "event": event})
@@ -751,38 +766,40 @@ def drawFirstPage(data, language):
     scribus.setParagraphStyle("title_par_style", title_frame)
 
     legend_frame = scribus.createText(17, 136.240, 121, 3.5)
-    scribus.setText(f"{t('legend')}", legend_frame)
+    scribus.setText(f"{t("planner.legend")}", legend_frame)
     scribus.setParagraphStyle("text_left_par_style", legend_frame)
 
     moonphases_frame = scribus.createText(17, 140.490, 121, 3.5)
-    moonphases_text = f"🌑 🌓 🌕 🌗  {t('legend_moonphases')}"
+    moonphases_text = f"🌑 🌓 🌕 🌗  {t("planner.legendMoonphases")}"
     scribus.setText(moonphases_text, moonphases_frame)
     scribus.setParagraphStyle("text_left_par_style", moonphases_frame)
     scribus.selectText(0, 10, moonphases_frame)
     scribus.setCharacterStyle("moonphase_ch_style")
 
-    _draw_planet_frame(144.741, f"<  {t('legend_mooneclipses')}")
-    _draw_planet_frame(148.992, f"A  {t('sun')}")
-    _draw_planet_frame(153.243, f"B  {t('moon')}")
-    _draw_planet_frame(157.494, f"C  {t('mercury')}")
-    _draw_planet_frame(161.745, f"D  {t('venus')}")
-    _draw_planet_frame(165.996, f"E  {t('mars')}")
-    _draw_planet_frame(170.247, f"F  {t('jupiter')}")
-    _draw_planet_frame(174.498, f"G  {t('saturn')}")
-    _draw_planet_frame(178.626, f"H  {t('uranus')}")
-    _draw_planet_frame(183.582, f"I  {t('neptune')}")
-    _draw_acronym_frame(148.992, f"mwe  {t('maj_elon_west')}", "mwe")
-    _draw_acronym_frame(153.243, f"mee  {t('maj_elon_east')}", "mee")
-    _draw_acronym_frame(157.494, f"sup conj  {t('sup_conj')}", "sup conj")
-    _draw_acronym_frame(161.745, f"inf conj  {t('inf_conj')}", "inf conj")
-    _draw_acronym_frame(165.996, f"conj  {t('conj')}", "conj")
-    _draw_acronym_frame(170.247, f"opp  {t('opp')}", "opp")
-    _draw_acronym_frame(174.498, f"ecl tot  {t('ecl_tot')}", "ecl tot")
-    _draw_acronym_frame(178.626, f"ecl par  {t('ecl_par')}", "ecl par")
-    _draw_acronym_frame(183.582, f"ecl pen  {t('ecl_pen')}", "ecl pen")
+    _draw_planet_frame(144.741, f"<  {t('planner.legendMooneclipses')}")
+    _draw_planet_frame(148.992, f"A  {t('planner.sun')}")
+    _draw_planet_frame(153.243, f"B  {t('planner.moon')}")
+    _draw_planet_frame(157.494, f"C  {t('planner.mercury')}")
+    _draw_planet_frame(161.745, f"D  {t('planner.venus')}")
+    _draw_planet_frame(165.996, f"E  {t('planner.mars')}")
+    _draw_planet_frame(170.247, f"F  {t('planner.jupiter')}")
+    _draw_planet_frame(174.498, f"G  {t('planner.saturn')}")
+    _draw_planet_frame(178.626, f"H  {t('planner.uranus')}")
+    _draw_planet_frame(183.582, f"I  {t('planner.neptune')}")
+    _draw_acronym_frame(148.992, f"mwe  {t('planner.majElongWest')}", "mwe")
+    _draw_acronym_frame(153.243, f"mee  {t('planner.majElongEast')}", "mee")
+    _draw_acronym_frame(157.494, f"sup conj  {t('planner.supConj')}", "sup conj")
+    _draw_acronym_frame(161.745, f"inf conj  {t('planner.infConj')}", "inf conj")
+    _draw_acronym_frame(165.996, f"conj  {t('planner.conj')}", "conj")
+    _draw_acronym_frame(170.247, f"opp  {t('planner.opp')}", "opp")
+    _draw_acronym_frame(174.498, f"ecl tot  {t('planner.eclTot')}", "ecl tot")
+    _draw_acronym_frame(178.626, f"ecl par  {t('planner.eclPar')}", "ecl par")
+    _draw_acronym_frame(183.582, f"ecl pen  {t('planner.eclPen')}", "ecl pen")
 
     explanation_frame = scribus.createText(17, 187.335, 121, 12.461)
-    scribus.setText(fill(t("legend_explanation"), city=t("capital")), explanation_frame)
+    scribus.setText(
+        fill(t("planner.legendExplanation"), city=t("capital")), explanation_frame
+    )
     scribus.setFont("Simoncini Garamond Std Roman", explanation_frame)
     scribus.setParagraphStyle("title_explanation_par_style", explanation_frame)
     scribus.setTextVerticalAlignment(scribus.ALIGNV_BOTTOM, explanation_frame)
@@ -855,19 +872,26 @@ def drawSecondPage(data, language):
 
     # --- 1. EASTER AND SEASONS SECTION (Handled separately for formatting) ---
     left_text = "\n".join(
-        [t("easter"), t("eq_spring"), t("eq_summer"), t("eq_autumn"), t("eq_winter")]
+        [
+            t("planner.easter"),
+            t("planner.eqSpring"),
+            t("planner.eqSummer"),
+            t("planner.eqAutumn"),
+            t("planner.eqWinter"),
+        ]
     )
 
     right_lines = []
     # Easter
     if "easter" in planets:
         _, m, d, _, _, _ = _get_date_parts(planets["easter"])
-        right_lines.append(f"{d} {t(months[int(m) - 1])}")
+        right_lines.append(f"{d} {localities[language]["months"][int(m) - 1]}")
+
     # Seasons
     if "seasons" in planets:
         for season in planets["seasons"]:
             _, m, d, _, _, _ = _get_date_parts(season["date"])
-            right_lines.append(f"{d} {t(months[int(m) - 1])}")
+            right_lines.append(f"{d} {localities[language]["months"][int(m) - 1]}")
 
     h_left = _draw_frame(10, current_y, 50, 100, left_text, "planets_bold_par_style")
     h_right = _draw_frame(
@@ -887,7 +911,7 @@ def drawSecondPage(data, language):
 
         # Prepare texts
         # Left: Planet Name
-        text_left = t(p_key)
+        text_left = t(f"planner.{p_key}")
 
         # Center: Event descriptions
         center_lines = [_format_event_line(item, p_key) for item in items]
@@ -899,7 +923,9 @@ def drawSecondPage(data, language):
             # Handle both datetime objects and strings in the original dictionary
             d_obj = item["date"]
             _, m, d, H, M, _ = _get_date_parts(d_obj)
-            right_lines.append(f"{d} {t(months[int(m) - 1])} h{H}:{M}")
+            right_lines.append(
+                f"{d} {localities[language]["months"][int(m) - 1]} h{H}:{M}"
+            )
         text_right = "\n".join(right_lines)
 
         # Draw frames
@@ -951,7 +977,7 @@ def create_planner_A5(data, language):
             # logger.logmem()
             # ::: remove before release :::
             msg = fill(
-                ui_t("planner_page_elaborating"),
+                ui_t("planner.pageElaborating"),
                 pagesQty=pagesQty,
                 total_pages=total_pages,
             )
@@ -963,8 +989,8 @@ def create_planner_A5(data, language):
                 draw_page("left", item)
             else:
                 scribus.messageBox(
-                    ui_t("mainform_title"),
-                    fill(ui_t("err_unknown_page_type"), current_page=current_page),
+                    ui_t("gui.mainform.title"),
+                    fill(ui_t("err.unknownPageType"), current_page=current_page),
                     scribus.ICON_CRITICAL,
                 )
                 sys.exit(1)

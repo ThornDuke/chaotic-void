@@ -9,7 +9,7 @@ from scribus import getGuiLanguage  # pyright: ignore[reportMissingImports]
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
-from .translator import translator, by_acronym
+from .translator import translator
 from .data.localization import languages
 from . import constants
 
@@ -17,7 +17,7 @@ from . import constants
 # List of available language keys imported from the localization data
 languages_list = sorted(list(languages.keys()))
 
-ui_t = translator(by_acronym(getGuiLanguage()))
+ui_t = translator(getGuiLanguage())
 
 
 def get_planner_edition():
@@ -47,7 +47,7 @@ def get_planner_edition():
 
     # Main window initialization
     root = tk.Tk()
-    root.title(ui_t("mainform_title"))
+    root.title(ui_t("gui.mainform.title"))
     root.resizable(False, False)
 
     # Main container frame with padding
@@ -59,7 +59,7 @@ def get_planner_edition():
     years = list(range(current_year - 25, current_year + 26))
 
     # Year Label and Combobox
-    ttk.Label(main_frame, text=f"{ui_t('mainform_year')}:").grid(
+    ttk.Label(main_frame, text=f"{ui_t('gui.mainform.year')}:").grid(
         row=0, column=0, sticky=tk.W, pady=5
     )
     year_var = tk.StringVar(value=str(current_year))
@@ -73,7 +73,7 @@ def get_planner_edition():
     year_combo.grid(row=0, column=1, pady=5, padx=(10, 0))
 
     # Language Label and Combobox
-    ttk.Label(main_frame, text=f"{ui_t('mainform_language')}:").grid(
+    ttk.Label(main_frame, text=f"{ui_t('gui.mainform.language')}:").grid(
         row=1, column=0, sticky=tk.W, pady=5
     )
     language_var = tk.StringVar(value="English")
@@ -96,12 +96,15 @@ def get_planner_edition():
 
     # OK and Cancel buttons
     ok_button = ttk.Button(
-        button_frame, text=f"{ui_t('btn_ok')}", command=on_ok, width=10
+        button_frame, text=f"{ui_t('gui.mainform.btnOk')}", command=on_ok, width=10
     )
     ok_button.grid(row=0, column=0, padx=5)
 
     cancel_button = ttk.Button(
-        button_frame, text=f"{ui_t('btn_cancel')}", command=on_cancel, width=10
+        button_frame,
+        text=f"{ui_t('gui.mainform.btnCancel')}",
+        command=on_cancel,
+        width=10,
     )
     cancel_button.grid(row=0, column=1, padx=5)
 

@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Kalender: bearbetar sida {{pagesQty}} av {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Kalendern har bearbetats korrekt!\n\nBearbetningstid: {{processing_time}}"
     }
   },

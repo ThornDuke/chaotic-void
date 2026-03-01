@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Terminarz: przetwarzanie strony {{pagesQty}} z {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Terminarz został poprawnie przetworzony!\n\nCzas przetwarzania: {{processing_time}}"
     }
   },

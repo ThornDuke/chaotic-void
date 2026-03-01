@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Planer: obrada stranice {{pagesQty}} od {{total_pages}}"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "Planer je uspješno obrađen!\n\nVrijeme obrade: {{processing_time}}"
     }
   },

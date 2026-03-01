@@ -40,6 +40,7 @@
       "plannerPageElaborating": "Agenda: pagina {{pagesQty}} van {{total_pages}} verwerken"
     },
     "endform": {
+      "title": "Planner Generator",
       "outcome": "De agenda is succesvol verwerkt!\n\nVerwerkingstijd: {{processing_time}}"
     }
   },
