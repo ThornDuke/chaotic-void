@@ -13,10 +13,10 @@ from .translator import translator, by_acronym
 from .data.holidays import holidays
 from .utilities import (
     fill,
-    # === temp / debug
+    # ::: temp/debug :::
     # generate_filename,
     # save_to_file
-    # === remove before release
+    # ::: remove before release :::
 )
 
 ui_t = translator(by_acronym(scribus.getGuiLanguage()))
@@ -540,10 +540,10 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
         mercury_max_elongation_data_list=mercury_max_elongation_data,
     )
 
-    # === temp / debug
+    # ::: temp/debug :::
     # calendar_filename = generate_filename(prefix="calendar_", ext=".py")
     # save_to_file(full_calendar, calendar_filename)
-    # === remove before release
+    # ::: remove before release :::
 
     scribus.progressReset()
     scribus.statusMessage("")

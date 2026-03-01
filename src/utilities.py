@@ -5,9 +5,9 @@ import sys
 import pprint
 import importlib.metadata
 import scribus  # pyright: ignore[reportMissingImports]
-from .translator import by_acronym, translator
+from .translator2 import translator
 
-ui_t = translator(by_acronym(scribus.getGuiLanguage()))
+ui_t = translator(scribus.getGuiLanguage())
 
 
 def fill(template, **replacements):
@@ -183,11 +183,11 @@ def check_requirements():
     # --- Fonts ---
     report["fonts"] = font_availability(FONTS)
 
-    # === temp / debug
+    # ::: temp/debug :::
     # with open('report.txt', 'w') as rf:
     #   for item in report:
     #     rf.write(f"{item}: {report[item]}\n")
-    # === remove before release
+    # ::: remove before release :::
 
     return report
 

@@ -16,15 +16,15 @@ from .utilities import (
     fill,
     round_dt_to_min,
     generate_filename,
-    # === temp / debug
+    # ::: temp/debug :::
     # save_to_file,
-    # === remove before release
+    # ::: remove before release :::
 )
 from . import constants
 
-# === temp / debug
+# ::: temp/debug :::
 # from src.archivist import Logger
-# === remove before release
+# ::: remove before release :::
 
 ui_t = translator(by_acronym(scribus.getGuiLanguage()))
 
@@ -845,10 +845,10 @@ def drawSecondPage(data, language):
     months = constants.MONTHS
     planets = extract_planetary_events(data)
 
-    # === temp / debug
+    # ::: temp/debug :::
     # planets_filename = generate_filename(prefix="planets_", ext=".py")
     # save_to_file(planets, planets_filename)
-    # === remove before release
+    # ::: remove before release :::
 
     current_y = 10
     y_gap = 2
@@ -921,10 +921,10 @@ def create_planner_A5(data, language):
     Iterates through chunks of days, creates new pages in Scribus,
     and handles progress bars.
     """
-    # === temp / debug
+    # ::: temp/debug :::
     # logger = Logger()
     # logger.log("start")
-    # === remove before release
+    # ::: remove before release :::
     filename = generate_filename(prefix="AG_", ext=".sla")
     page_data_list = split_list(data)
     total_pages = len(page_data_list) + 2
@@ -946,10 +946,10 @@ def create_planner_A5(data, language):
         if current_page < total_pages:
             scribus.newPage(-1)
             pagesQty = scribus.pageCount()
-            # === temp / debug
+            # ::: temp/debug :::
             # logger.log(f"starting page {current_page}")
             # logger.logmem()
-            # === remove before release
+            # ::: remove before release :::
             msg = fill(
                 ui_t("planner_page_elaborating"),
                 pagesQty=pagesQty,
@@ -973,7 +973,7 @@ def create_planner_A5(data, language):
     if scribus.haveDoc():
         scribus.saveDoc()
 
-    # === temp / debug
+    # ::: temp/debug :::
     # logger.log("END")
     # logger.logmem()
-    # === remove before release
+    # ::: remove before release :::

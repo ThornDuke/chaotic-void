@@ -61,3 +61,6 @@ notes.md
 
 # skyfield
 *.bsp
+
+# scribus
+*.sla
