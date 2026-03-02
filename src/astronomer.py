@@ -8,10 +8,6 @@ holidays (Easter) using the 'astral' and 'pyephem' libraries.
 
 import sys
 import datetime
-
-# ::: temp/debug :::
-# from zoneinfo import ZoneInfo
-# ::: remove before release :::
 from pytz import timezone
 from collections import namedtuple
 import scribus  # pyright: ignore[reportMissingImports]
@@ -348,9 +344,6 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
             object_rise_times,
             object_transit_times,
             object_set_times,
-            # ::: temp/debug :::
-            # are_sets_visibles
-            # ::: remove before release :::
             are_rises_visibles,
         ):  # pyright: ignore[reportArgumentType]
             time_ort = ort.astimezone(zone)

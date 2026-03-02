@@ -205,10 +205,6 @@ def merge_calendar_data(target_list, **data_sources):
         "saturn_oc_data_list",
         "uranus_data_list",
         "uranus_oc_data_list",
-        # ::: temp/debug :::
-        # "neptune_data_list",
-        # "neptune_oc_data_list",
-        # ::: remove before release :::
         "venus_max_elongation_data_list",
         "mercury_max_elongation_data_list",
     ]
@@ -299,16 +295,6 @@ def merge_calendar_data(target_list, **data_sources):
                 "uranus_oc_type": "uranus_oc_type",
             },
         },
-        # ::: temp/debug :::
-        # "neptune_oc_data_list": {
-        #     "key_type": "ymd",
-        #     "mapping": {
-        #         "neptune_oc_time": "neptune_oc_time",
-        #         "neptune_oc": "neptune_oc",
-        #         "neptune_oc_type": "neptune_oc_type",
-        #     },
-        # },
-        # ::: remove before release :::
     }
 
     # Add planets to configuration (generic logic: copy everything found)
@@ -510,12 +496,6 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     uranus_data = astronomer.get_ephemeris_data("Uranus", year, language)
     uranus_oc_data = astronomer.opposition_conjunction("uranus", year, language)
 
-    # ::: temp/debug :::
-    # notify(10, "gui.statusMessage.neptuneEph")
-    # neptune_data = astronomer.get_ephemeris_data("Neptune", year, language)
-    # neptune_oc_data = astronomer.opposition_conjunction("neptune", year, language)
-    # ::: remove before release :::
-
     notify(11, "gui.statusMessage.equinoxesEph")
     fixed_holidays = get_holidays_list(year, language)
     seasons = translated_seasons(astronomer.get_seasons(year), language)
@@ -542,10 +522,6 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
         saturn_oc_data_list=saturn_oc_data,
         uranus_data_list=uranus_data,
         uranus_oc_data_list=uranus_oc_data,
-        # ::: temp/debug :::
-        # neptune_data_list=neptune_data,
-        # neptune_oc_data_list=neptune_oc_data,
-        # ::: remove before release :::
         venus_max_elongation_data_list=venus_max_elongation_data,
         mercury_max_elongation_data_list=mercury_max_elongation_data,
     )

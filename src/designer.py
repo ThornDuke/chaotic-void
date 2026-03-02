@@ -389,9 +389,6 @@ def draw_planets_ephemeris(x_pos, y_pos, datadict):
         ("jupiter", "F"),
         ("saturn", "G"),
         ("uranus", "H"),
-        # ::: temp/debug :::
-        # ("neptune", "I"),
-        # ::: remove before release :::
     ]
 
     # vengono stampati solo quelli che hanno un campo '<planet>_set'
@@ -492,9 +489,6 @@ def draw_page(side, items):
             ("jupiter", "F"),
             ("saturn", "G"),
             ("uranus", "H"),
-            # ::: temp/debug :::
-            # ("neptune", "I"),
-            # ::: remove before release :::
         ]
         conj_types = {"o": "opp", "c": "conj", "sc": "sup conj", "ic": "inf conj"}
         eclipse_types = {
@@ -662,9 +656,6 @@ def extract_planetary_events(input_data):
         "jupiter": [],
         "saturn": [],
         "uranus": [],
-        # ::: temp/debug :::
-        # "neptune": [],
-        # ::: remove before release :::
     }
 
     for entry in input_data:
@@ -722,9 +713,6 @@ def extract_planetary_events(input_data):
             "jupiter",
             "saturn",
             "uranus",
-            # ::: temp/debug :::
-            # "neptune",
-            # ::: remove before release :::
         ]:
             if f"{ep}_oc_type" in entry:
                 event = "CONJ" if entry[f"{ep}_oc_type"] == "c" else "OPP"
