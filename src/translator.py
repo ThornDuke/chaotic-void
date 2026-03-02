@@ -139,3 +139,43 @@ def file_init(language, acronym):
         print(f"|  SUCCESS: Created '{file_path}' successfully.")
     except OSError as e:
         print(f"|  ERR: Could not create file '{file_path}': {e}")
+
+
+def languages_list() -> list[str]:
+    """Scans the 'intl' folder and returns a list of language names.
+
+    Iterates over all JSON files in the 'intl' directory (relative to the
+    current working directory) and extracts the value of the nested key
+    ``meta.language`` from each file.
+
+    Returns:
+        A list of language name strings found across all JSON files.
+        Returns an empty list if no JSON files are found or none contain
+        a valid ``meta.language`` key. For example::
+
+            ["Italian", "English", "French"]
+
+    Raises:
+        FileNotFoundError: If the 'intl' directory does not exist.
+        json.JSONDecodeError: If a JSON file is malformed and cannot be parsed.
+        PermissionError: If the function lacks read permissions on the folder
+            or any of its files.
+
+    Example:
+        >>> languages = languages_list()
+        >>> print(languages)
+        ['Italian', 'English', 'French']
+    """
+    folder_path = Path("intl")
+    languages = []
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".json"):
+            filepath = os.path.join(folder_path, filename)
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                language = data.get("meta", {}).get("language")
+                if language:
+                    languages.append(language)
+
+    return languages

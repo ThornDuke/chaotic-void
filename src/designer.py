@@ -786,7 +786,8 @@ def drawFirstPage(data, language):
 
     explanation_frame = scribus.createText(17, 187.335, 121, 12.461)
     scribus.setText(
-        fill(t("planner.legendExplanation"), city=t("capital")), explanation_frame
+        fill(t("planner.legendExplanation"), city=localities[language]["capital"]),
+        explanation_frame,
     )
     scribus.setFont("Simoncini Garamond Std Roman", explanation_frame)
     scribus.setParagraphStyle("title_explanation_par_style", explanation_frame)
@@ -965,7 +966,7 @@ def create_planner_A5(data, language):
             # logger.logmem()
             # ::: remove before release :::
             msg = fill(
-                ui_t("planner.pageElaborating"),
+                ui_t("gui.statusMessage.plannerPageElaborating"),
                 pagesQty=pagesQty,
                 total_pages=total_pages,
             )

@@ -9,13 +9,12 @@ from scribus import getGuiLanguage  # pyright: ignore[reportMissingImports]
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
-from .translator import translator
-from .data.localization import languages
+from .translator import translator, languages_list
 from . import constants
 
 # --- Global Variables ---
 # List of available language keys imported from the localization data
-languages_list = sorted(list(languages.keys()))
+languages_list = sorted(list(languages_list()))
 
 ui_t = translator(getGuiLanguage())
 
