@@ -1,4 +1,57 @@
 # -*- coding: utf-8 -*-
+"""
+Internationalization (i18n) module for managing multi-language support.
+
+This module provides utilities to load, initialize, and query JSON-based
+translation files stored in the './intl' directory. Each translation file
+is a JSON document that contains a 'meta' section (with 'language' and
+'acronym' fields) and any number of nested keys holding translated strings.
+
+Directory structure expected::
+
+    ./intl/
+        en.json
+        it.json
+        fr.json
+        ...
+
+Each JSON file has the following minimum structure::
+
+    {
+      "meta": {
+        "language": "English",
+        "acronym": "en"
+      },
+      "some": {
+        "nested": {
+          "key": "Translated string"
+        }
+      }
+    }
+
+Public API:
+    translator(language) -> callable
+        Returns a ``search(key_path)`` function that resolves dot-notation
+        keys (e.g. ``"some.nested.key"``) to their translated strings for
+        the requested language.
+
+    init()
+        Creates the './intl' directory and a default 'en.json' file.
+
+    file_init(language, acronym)
+        Creates a new translation file skeleton inside './intl'.
+
+    languages_list() -> list[str]
+        Returns the list of all language names found in the './intl' directory.
+
+Example usage::
+
+    t = translator("en")
+    print(t("greetings.hello"))   # -> "Hello"
+
+    t = translator("it")
+    print(t("greetings.hello"))   # -> "Ciao"
+"""
 from pathlib import Path
 import json
 import os

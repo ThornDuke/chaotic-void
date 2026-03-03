@@ -26,6 +26,7 @@ REQUIREMENTS
     planets positions and for the moon eclypses <https://rhodesmill.org/skyfield/>
     * Simoncini Garamond Std font for text
     * Symbola font for moon and sun symbols
+    * AstroGadget for planet symbols
 
 When first run, Skyfield will automatically download the file
 “de440s.bsp” (approximately 30MB) from a NASA server if it is
@@ -53,7 +54,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 __program_name__ = "Planner"
-__version__ = "3.1.0"
+__version__ = "3.1.1"
 __author__ = "Sergio Spina"
 __email__ = "sergio.am.spina@gmail.com"
 __license__ = "GPLv3"
@@ -107,8 +108,8 @@ def main() -> None:
         calendar_data = calendarist.generate_full_calendar(year, language)
         designer.create_planner_A5(calendar_data, language)
         scribus.setInfo("Sergio Spina", "A5 Planner", f"Planner A5 for the year {year}")
-        process_end: datetime.datetime = datetime.datetime.now().replace(microsecond=0)
-        duration: datetime.timedelta = process_end - process_start
+        process_end = datetime.datetime.now().replace(microsecond=0)
+        duration = process_end - process_start
         scribus.messageBox(
             t("gui.endform.title"),
             fill(t("gui.endform.outcome"), processing_time=duration),
