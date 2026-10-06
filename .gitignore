@@ -64,3 +64,8 @@ notes.md
 
 # scribus
 *.sla
+*.pdf
+
+# file di appunti, note, tests, ecc.
+# ad es.: notes.gign.md
+*.gign.*

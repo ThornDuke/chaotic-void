@@ -91,28 +91,48 @@ def check_requirements():
             return False
         return True
 
-    def lib_availability(lib_name, min_version):
-        # 'packaging' is a third-party library. Use fallback if missing.
+    def version_key(version):
+        """
+        Converts a version string into a comparable key.
+
+        Uses 'packaging' when available (handles pre-releases, etc.);
+        otherwise falls back to the leading numeric release segment
+        (e.g. '1.48.post1' -> (1, 48)), padded so (1, 48) == (1, 48, 0).
+        """
         try:
             from packaging.version import (
                 parse as parse_version,
             )  # pyright: ignore[reportMissingImports]
-        except ImportError:
-            return {"available": False, "error": ui_t("gui.checkform.missingPackaging")}
 
+            return parse_version(version)
+        except ImportError:
+            match = re.match(r"\d+(?:\.\d+)*", version.strip())
+            if not match:
+                raise ValueError(f"Unparsable version string: {version!r}")
+            parts = [int(x) for x in match.group(0).split(".")]
+            while len(parts) < 4:
+                parts.append(0)
+            return tuple(parts)
+
+    def lib_availability(lib_name, min_version):
+        # 1. Is the library installed at all? (needs no third-party code)
         try:
             curr_ver = importlib.metadata.version(lib_name)
-            enough = parse_version(curr_ver) >= parse_version(min_version)
-            return {
-                "available": True,
-                "req_ver": min_version,
-                "curr_ver": curr_ver,
-                "is_enough": enough,
-            }
         except importlib.metadata.PackageNotFoundError:
-            return {
-                "available": False,
-            }
+            return {"available": False}
+
+        # 2. Compare versions ('packaging' if present, built-in fallback if not)
+        try:
+            enough = version_key(curr_ver) >= version_key(min_version)
+        except ValueError as e:
+            return {"available": False, "error": str(e)}
+
+        return {
+            "available": True,
+            "req_ver": min_version,
+            "curr_ver": curr_ver,
+            "is_enough": enough,
+        }
 
     def font_availability(font_names):
         # scribus.getFontNames() returns a list of installed fonts
@@ -229,7 +249,7 @@ def validate_requirements(report):
     # 3. Check Tkinter
     tk_rep = report["tkinter"]
     if not tk_rep["available"]:
-        missing_items.append(ui_t("chekform.tk"))
+        missing_items.append(ui_t("checkform.tk"))
     elif not tk_rep["is_enough"]:
         missing_items.append(
             fill(
