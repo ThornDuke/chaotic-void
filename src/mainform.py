@@ -36,7 +36,11 @@ def get_planner_edition():
     def on_ok():
         """Handles the OK button click: stores values and closes the UI."""
         nonlocal result
-        result = {"year": int(year_var.get()), "language": language_var.get()}
+        result = {
+            "year": int(year_var.get()),
+            "language": language_var.get(),
+            "observer": observer_var.get()
+        }
         root.destroy()
 
     def on_cancel():
