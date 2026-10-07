@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 from .translator import translator, languages_list
+from .data.localities import localities
 from . import constants
 
 # --- Global Variables ---
@@ -85,13 +86,27 @@ def get_planner_edition():
     )
     language_combo.grid(row=1, column=1, pady=5, padx=(10, 0))
 
+    # Observer label and combobox
+    ttk.Label(main_frame, text=f"{ui_t('gui.mainform.observer')}:").grid(
+        row=2, column=0, sticky=tk.W, pady=5
+    )
+    observer_var = tk.StringVar(value="London")
+    observer_combo = ttk.Combobox(
+        main_frame,
+        textvariable=observer_var,
+        values=[value["capital"] for value in localities.values() if "capital" in value],
+        state="readonly",
+        width=20,
+    )
+    observer_combo.grid(row=2, column=1, pady=5, padx=(10, 0))
+
     # Visual separator
     separator = ttk.Separator(main_frame, orient=tk.HORIZONTAL)
-    separator.grid(row=2, column=0, columnspan=2, sticky=tk.EW, pady=15)
+    separator.grid(row=3, column=0, columnspan=2, sticky=tk.EW, pady=15)
 
     # Button container
     button_frame = ttk.Frame(main_frame)
-    button_frame.grid(row=3, column=0, columnspan=2, pady=5)
+    button_frame.grid(row=4, column=0, columnspan=2, pady=5)
 
     # OK and Cancel buttons
     ok_button = ttk.Button(

@@ -8,6 +8,7 @@
       "title": "Year and language selection",
       "year": "Year",
       "language": "Language",
+      "observer": "Observer",
       "btnOk": "Ok",
       "btnCancel": "Cancel"
     },
