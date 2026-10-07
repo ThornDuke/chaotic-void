@@ -18,6 +18,7 @@ from skyfield.searchlib import find_maxima
 import ephem
 from .translator import translator
 from .data.localities import localities
+from .data.cities import cities
 from . import constants
 from .utilities import (
     fill,
@@ -69,7 +70,7 @@ def bsp_alias(planet_name, data):
     raise ValueError(fill(ui_t("err.planetNotPresent"), planet_name=planet_name))
 
 
-def opposition_conjunction(body, year, language):
+def opposition_conjunction(body, year, observer):
     """
     Calculate the dates and times of astronomical oppositions and conjunctions
     for a given celestial body and year.
@@ -82,8 +83,8 @@ def opposition_conjunction(body, year, language):
     Returns:
         list[dict]: A list of dictionaries containing the event date, time, and type.
     """
-    t = translator(language)
-    zone = timezone(localities[language]["timezone"])
+    # t = translator(language)
+    zone = timezone(cities[observer]["timezone"])
 
     l_body = body.lower()
     if l_body not in [
@@ -148,7 +149,7 @@ def opposition_conjunction(body, year, language):
     return result
 
 
-def max_elongation(body, year, language):
+def max_elongation(body, year, language, observer):
     """
     Find the dates of maximum elongation (eastern or western) for inner planets.
 
@@ -173,7 +174,7 @@ def max_elongation(body, year, language):
         raise ValueError(ui_t("err.badElongationTarget"))
 
     t = translator(language)
-    zone = timezone(localities[language]["timezone"])
+    zone = timezone(cities[observer]["timezone"])
 
     ts = load.timescale()
     t0 = ts.utc(year - 1)
@@ -281,7 +282,7 @@ def fill_eph_holes(data):
     return data
 
 
-def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
+def get_ephemeris_data(object: str, year: int, observer: str) -> list[dict]:
     """
     Calculates the times of sunrise, transit and sunset of the sun
     or a planet for each day of the specified year. The data used
@@ -298,7 +299,7 @@ def get_ephemeris_data(object: str, year: int, language: str) -> list[dict]:
     Returns:
       list[dict]: daily list of dictionaries.
     """
-    localInfo = localities[language]
+    localInfo = cities[observer]
     zone = timezone(localInfo["timezone"])
     latitude = localInfo["latitude"]
     longitude = localInfo["longitude"]

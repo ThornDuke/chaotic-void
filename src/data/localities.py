@@ -2,9 +2,6 @@ localities = {
     "Italian": {
         "state": "Italia",
         "capital": "Roma",
-        "latitude": 41.9028,
-        "longitude": 12.4964,
-        "timezone": "Europe/Rome",
         "months": [
             "Gennaio",
             "Febbraio",
@@ -40,9 +37,6 @@ localities = {
     "Afrikaans": {
         "state": "Suid-Afrika",
         "capital": "Pretoria",
-        "latitude": -25.7479,
-        "longitude": 28.2293,
-        "timezone": "Africa/Johannesburg",
         "months": [
             "Januarie",
             "Februarie",
@@ -82,9 +76,6 @@ localities = {
     "Catalan": {
         "state": "Andorra",
         "capital": "Andorra la Vella",
-        "latitude": 42.5063,
-        "longitude": 1.5218,
-        "timezone": "Europe/Andorra",
         "months": [
             "Gener",
             "Febrer",
@@ -120,9 +111,6 @@ localities = {
     "Croatian": {
         "state": "Hrvatska",
         "capital": "Zagreb",
-        "latitude": 45.8150,
-        "longitude": 15.9819,
-        "timezone": "Europe/Zagreb",
         "months": [
             "Siječanj",
             "Veljača",
@@ -162,9 +150,6 @@ localities = {
     "Czech": {
         "state": "Česká republika",
         "capital": "Praha",
-        "latitude": 50.0755,
-        "longitude": 14.4378,
-        "timezone": "Europe/Prague",
         "months": [
             "Leden",
             "Únor",
@@ -200,9 +185,6 @@ localities = {
     "Dutch": {
         "state": "Nederland",
         "capital": "Amsterdam",
-        "latitude": 52.3676,
-        "longitude": 4.9041,
-        "timezone": "Europe/Amsterdam",
         "months": [
             "Januari",
             "Februari",
@@ -242,9 +224,6 @@ localities = {
     "English": {
         "state": "United Kingdom",
         "capital": "London",
-        "latitude": 51.5074,
-        "longitude": -0.1278,
-        "timezone": "Europe/London",
         "months": [
             "January",
             "February",
@@ -284,9 +263,6 @@ localities = {
     "Finnish": {
         "state": "Suomi",
         "capital": "Helsinki",
-        "latitude": 60.1699,
-        "longitude": 24.9384,
-        "timezone": "Europe/Helsinki",
         "months": [
             "Tammikuu",
             "Helmikuu",
@@ -326,9 +302,6 @@ localities = {
     "French": {
         "state": "France",
         "capital": "Paris",
-        "latitude": 48.8566,
-        "longitude": 2.3522,
-        "timezone": "Europe/Paris",
         "months": [
             "Janvier",
             "Février",
@@ -368,9 +341,6 @@ localities = {
     "German": {
         "state": "Deutschland",
         "capital": "Berlin",
-        "latitude": 52.5200,
-        "longitude": 13.4050,
-        "timezone": "Europe/Berlin",
         "months": [
             "Januar",
             "Februar",
@@ -410,9 +380,6 @@ localities = {
     "Hungarian": {
         "state": "Magyarország",
         "capital": "Budapest",
-        "latitude": 47.4979,
-        "longitude": 19.0402,
-        "timezone": "Europe/Budapest",
         "months": [
             "Január",
             "Február",
@@ -452,9 +419,6 @@ localities = {
     "Norwegian": {
         "state": "Norge",
         "capital": "Oslo",
-        "latitude": 59.9139,
-        "longitude": 10.7522,
-        "timezone": "Europe/Oslo",
         "months": [
             "Január",
             "Február",
@@ -494,9 +458,6 @@ localities = {
     "Polish": {
         "state": "Polska",
         "capital": "Warszawa",
-        "latitude": 52.2297,
-        "longitude": 21.0122,
-        "timezone": "Europe/Warsaw",
         "months": [
             "Styczeń",
             "Luty",
@@ -536,9 +497,6 @@ localities = {
     "Portuguese": {
         "state": "Portugal",
         "capital": "Lisboa",
-        "latitude": 38.7223,
-        "longitude": -9.1393,
-        "timezone": "Europe/Lisbon",
         "months": [
             "Janeiro",
             "Fevereiro",
@@ -574,9 +532,6 @@ localities = {
     "Romanian": {
         "state": "România",
         "capital": "București",
-        "latitude": 44.4268,
-        "longitude": 26.1025,
-        "timezone": "Europe/Bucharest",
         "months": [
             "Ianuarie",
             "Februarie",
@@ -612,9 +567,6 @@ localities = {
     "Russian": {
         "state": "Россия",
         "capital": "Москва",
-        "latitude": 55.7558,
-        "longitude": 37.6173,
-        "timezone": "Europe/Moscow",
         "months": [
             "Январь",
             "Февраль",
@@ -654,9 +606,6 @@ localities = {
     "Slovak": {
         "state": "Slovensko",
         "capital": "Bratislava",
-        "latitude": 48.1486,
-        "longitude": 17.1077,
-        "timezone": "Europe/Bratislava",
         "months": [
             "Január",
             "Február",
@@ -696,9 +645,6 @@ localities = {
     "Spanish": {
         "state": "España",
         "capital": "Madrid",
-        "latitude": 40.4168,
-        "longitude": -3.7038,
-        "timezone": "Europe/Madrid",
         "months": [
             "Enero",
             "Febrero",
@@ -734,9 +680,6 @@ localities = {
     "Swahili": {
         "state": "Tanzania",
         "capital": "Dodoma",
-        "latitude": -6.1731,
-        "longitude": 35.7419,
-        "timezone": "Africa/Dar_es_Salaam",
         "months": [
             "Januari",
             "Februari",
@@ -776,9 +719,6 @@ localities = {
     "Swedish": {
         "state": "Sverige",
         "capital": "Stockholm",
-        "latitude": 59.3293,
-        "longitude": 18.0686,
-        "timezone": "Europe/Stockholm",
         "months": [
             "Januari",
             "Februari",

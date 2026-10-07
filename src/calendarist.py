@@ -12,6 +12,7 @@ from . import astronomer
 from .translator import translator
 from .data.holidays import holidays
 from .data.localities import localities
+from .data.cities import cities
 from .utilities import (
     fill,
     # ::: temp/debug :::
@@ -410,7 +411,7 @@ def print_as_json(data, filename):
         f.write("]\n")
 
 
-def generate_full_calendar(year: int, language: str) -> list[dict]:
+def generate_full_calendar(year: int, language: str, observer: str) -> list[dict]:
     """
     High-level function to generate a complete calendar with all features.
 
@@ -443,14 +444,14 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
 
     # Fetch data from astronomical module
     notify(2, "gui.statusMessage.sunEph")
-    sun_data = astronomer.get_ephemeris_data("Sun", year, language)
+    sun_data = astronomer.get_ephemeris_data("Sun", year, observer)
 
     notify(3, "gui.statusMessage.moonEph")
-    moon_data = astronomer.get_ephemeris_data("Moon", year, language)
+    moon_data = astronomer.get_ephemeris_data("Moon", year, observer)
     moon_phases = astronomer.get_moon_phases(year)
     easter_day = astronomer.get_easter_day(year)
     moon_eclipses = astronomer.get_mooneclipses_data(
-        year, localities[language]["timezone"]
+        year, cities[observer]["timezone"]
     )
 
     # Prepare Easter and Easter Monday
@@ -471,30 +472,30 @@ def generate_full_calendar(year: int, language: str) -> list[dict]:
     ]
 
     notify(4, "gui.statusMessage.mercuryEph")
-    mercury_data = astronomer.get_ephemeris_data("Mercury", year, language)
-    mercury_max_elongation_data = astronomer.max_elongation("mercury", year, language)
-    mercury_oc_data = astronomer.opposition_conjunction("mercury", year, language)
+    mercury_data = astronomer.get_ephemeris_data("Mercury", year, observer)
+    mercury_max_elongation_data = astronomer.max_elongation("mercury", year, language, observer)
+    mercury_oc_data = astronomer.opposition_conjunction("mercury", year, observer)
 
     notify(5, "gui.statusMessage.venusEph")
-    venus_data = astronomer.get_ephemeris_data("Venus", year, language)
-    venus_max_elongation_data = astronomer.max_elongation("venus", year, language)
-    venus_oc_data = astronomer.opposition_conjunction("venus", year, language)
+    venus_data = astronomer.get_ephemeris_data("Venus", year, observer)
+    venus_max_elongation_data = astronomer.max_elongation("venus", year, language, observer)
+    venus_oc_data = astronomer.opposition_conjunction("venus", year, observer)
 
     notify(6, "gui.statusMessage.marsEph")
-    mars_data = astronomer.get_ephemeris_data("Mars", year, language)
-    mars_oc_data = astronomer.opposition_conjunction("mars", year, language)
+    mars_data = astronomer.get_ephemeris_data("Mars", year, observer)
+    mars_oc_data = astronomer.opposition_conjunction("mars", year, observer)
 
     notify(7, "gui.statusMessage.jupiterEph")
-    jupiter_data = astronomer.get_ephemeris_data("Jupiter", year, language)
-    jupiter_oc_data = astronomer.opposition_conjunction("jupiter", year, language)
+    jupiter_data = astronomer.get_ephemeris_data("Jupiter", year, observer)
+    jupiter_oc_data = astronomer.opposition_conjunction("jupiter", year, observer)
 
     notify(8, "gui.statusMessage.saturnEph")
-    saturn_data = astronomer.get_ephemeris_data("Saturn", year, language)
-    saturn_oc_data = astronomer.opposition_conjunction("saturn", year, language)
+    saturn_data = astronomer.get_ephemeris_data("Saturn", year, observer)
+    saturn_oc_data = astronomer.opposition_conjunction("saturn", year, observer)
 
     notify(9, "gui.statusMessage.uranusEph")
-    uranus_data = astronomer.get_ephemeris_data("Uranus", year, language)
-    uranus_oc_data = astronomer.opposition_conjunction("uranus", year, language)
+    uranus_data = astronomer.get_ephemeris_data("Uranus", year, observer)
+    uranus_oc_data = astronomer.opposition_conjunction("uranus", year, observer)
 
     notify(11, "gui.statusMessage.equinoxesEph")
     fixed_holidays = get_holidays_list(year, language)

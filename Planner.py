@@ -95,7 +95,7 @@ def main() -> None:
     if not validate_requirements(sys_report):
         return
 
-    # edition contains {‘year’: int, ‘language’: str}
+    # edition contains {‘observer’: str, ‘language’: str, ‘year’: int} or None
     edition = mainform.get_planner_edition()
     if edition == None:
         return
@@ -104,10 +104,11 @@ def main() -> None:
         process_start = datetime.datetime.now().replace(microsecond=0)
         year = edition["year"]
         language = edition["language"]
+        observer = edition["observer"]
         # Data generation and layout creation
-        calendar_data = calendarist.generate_full_calendar(year, language)
-        designer.create_planner_A5(calendar_data, language)
-        scribus.setInfo("Sergio Spina", "A5 Planner", f"Planner A5 for the year {year}")
+        calendar_data = calendarist.generate_full_calendar(year, language, observer)
+        designer.create_planner_A5(calendar_data, language, observer)
+        scribus.setInfo("Sergio Spina", "A5 Planner", f"Edition {year} compiled for {observer} in {language} language")
         process_end = datetime.datetime.now().replace(microsecond=0)
         duration = process_end - process_start
         scribus.messageBox(

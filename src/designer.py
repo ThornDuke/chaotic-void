@@ -21,6 +21,7 @@ from .utilities import (
     # ::: remove before release :::
 )
 from .data.localities import localities
+from .data.cities import cities
 from . import constants
 
 # ::: temp/debug :::
@@ -721,13 +722,14 @@ def extract_planetary_events(input_data):
     return result
 
 
-def drawFirstPage(data, language):
+def drawFirstPage(data, language, observer):
     """
     Generates the first page of the astronomical calendar including title and legend.
 
     Args:
         data (list): The ephemeris data.
         language (str): Language code for translation.
+        observer (str): The location for which the astronomical calculations are made.
     """
 
     def _draw_planet_frame(ypos, text):
@@ -786,7 +788,7 @@ def drawFirstPage(data, language):
 
     explanation_frame = scribus.createText(17, 187.335, 121, 12.461)
     scribus.setText(
-        fill(t("planner.legendExplanation"), city=localities[language]["capital"]),
+        fill(t("planner.legendExplanation"), city=observer),
         explanation_frame,
     )
     scribus.setFont("Simoncini Garamond Std Roman", explanation_frame)
@@ -929,7 +931,7 @@ def drawSecondPage(data, language):
         current_y += max(h_l, h_c, h_r) + y_gap
 
 
-def create_planner_A5(data, language):
+def create_planner_A5(data, language, observer):
     """
     Orchestrates the creation of the entire A5 Planner.
 
@@ -952,7 +954,7 @@ def create_planner_A5(data, language):
     createTextStyles()
     scribus.saveDocAs(filename)
 
-    drawFirstPage(data, language)
+    drawFirstPage(data, language, observer)
     scribus.newPage(-1)
     drawSecondPage(data, language)
 
