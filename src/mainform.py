@@ -10,7 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 from .translator import translator, languages_list
-from .data.localities import localities
+from .data.cities import cities
 from . import constants
 
 # --- Global Variables ---
@@ -94,7 +94,7 @@ def get_planner_edition():
     observer_combo = ttk.Combobox(
         main_frame,
         textvariable=observer_var,
-        values=[value["capital"] for value in localities.values() if "capital" in value],
+        values=list(cities),
         state="readonly",
         width=20,
     )
