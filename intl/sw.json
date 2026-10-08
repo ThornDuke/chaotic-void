@@ -8,6 +8,7 @@
       "title": "Teuzi wa mwaka na lugha",
       "year": "Mwaka",
       "language": "Lugha",
+      "observer": "Mwangalizi",
       "btnOk": "Sawa",
       "btnCancel": "Ghairi"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Muda umehesabiwa kwa majira nukta ya Dodoma (Tanzania)",
     "legendMoonphases": "Awamu za mwezi. Muda wa awamu.",
     "legendMooneclipses": "Kupatwa kwa mwezi. A = kamili B = kiasi C = penumbra. Muda wa kupatwa.",
-    "legendExplanation": "Kwa kila sayari, nyakati za kuchomoza, kilele, na kuzama zimeonyeshwa.\nWakati wote unaonyeshwa kwa saa za ndani za {{city}}.",
+    "legendExplanation": "Kwa kila sayari, nyakati za kuchomoza, kufikia kilele na kutua zinaonyeshwa.\nMaandishi ni kwa lugha ya Kiswahili. Nyakati zote zimeonyeshwa kwa saa za mahali za {{city}}.",
     "notVisible": "Haionekani",
     "sun": "Jua",
     "moon": "Mwezi",

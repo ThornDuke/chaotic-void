@@ -8,6 +8,7 @@
       "title": "Auswahl von Jahr und Sprache",
       "year": "Jahr",
       "language": "Sprache",
+      "observer": "Beobachter",
       "btnOk": "Ok",
       "btnCancel": "Abbrechen"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Die Zeiten sind für die Koordinaten von Berlin (Deutschland) berechnet",
     "legendMoonphases": "Mondphasen. Zeit der Phase.",
     "legendMooneclipses": "Mondfinsternisse. A = total B = partiell C = Halbschatten. Zeit der Finsternis.",
-    "legendExplanation": "Für jeden Planeten sind die Zeiten für Aufgang, Kulmination und Untergang angegeben.\nAlle Zeiten sind in der Ortszeit von {{city}} angegeben.",
+    "legendExplanation": "Für jeden Planeten werden die Zeiten des Aufgangs, der Kulmination und des Untergangs angegeben.\nDie Texte sind in deutscher Sprache. Alle Zeiten werden in Ortszeit von {{city}} angegeben.",
     "notVisible": "Nicht sichtbar",
     "sun": "Sonne",
     "moon": "Mond",

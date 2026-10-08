@@ -8,6 +8,7 @@
       "title": "Výber roku a jazyka",
       "year": "Rok",
       "language": "Jazyk",
+      "observer": "Pozorovateľ",
       "btnOk": "Ok",
       "btnCancel": "Zrušiť"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Časy sú vypočítané pre súradnice Bratislava (Slovensko)",
     "legendMoonphases": "Fázy Mesiaca. Čas fázy.",
     "legendMooneclipses": "Zatmenia Mesiaca. A = úplné B = čiastočné C = polotieňové. Čas zatmenia.",
-    "legendExplanation": "Pre každú planétu sú uvedené časy východu, kulminácie a západu.\nVšetky časy sú uvedené v miestnom čase pre {{city}}.",
+    "legendExplanation": "Pri každej planéte sú uvedené časy východu, kulminácie a západu.\nTexty sú v slovenskom jazyku. Všetky časy sú uvedené v miestnom čase mesta {{city}}.",
     "notVisible": "Neviditeľné",
     "sun": "Slnko",
     "moon": "Mesiac",

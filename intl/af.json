@@ -8,6 +8,7 @@
       "title": "Seleksie van jaar en taal",
       "year": "Jaar",
       "language": "Taal",
+      "observer": "Waarnemer",
       "btnOk": "Ok",
       "btnCancel": "Kanselleer"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Tye word bereken vir die koördinate van Pretoria (Suid-Afrika)",
     "legendMoonphases": "Fases van die maan. Tyd van die fase.",
     "legendMooneclipses": "Maansverduisterings. A = totaal B = gedeeltelik C = penumbra. Tyd van die verduistering.",
-    "legendExplanation": "Vir elke planeet word die tye van opkoms, kulminasie en ondergang aangedui.\nAlle tye word in die plaaslike tyd van {{city}} aangedui.",
+    "legendExplanation": "Vir elke planeet word die tye van opkoms, kulminasie en sonsondergang aangedui.\nDie tekste is in Afrikaans. Alle tye word in plaaslike tyd van {{city}} aangedui.",
     "notVisible": "Nie sigbaar nie",
     "sun": "Son",
     "moon": "Maan",

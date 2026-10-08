@@ -8,6 +8,7 @@
       "title": "Výběr roku a jazyka",
       "year": "Rok",
       "language": "Jazyk",
+      "observer": "Pozorovatel",
       "btnOk": "Ok",
       "btnCancel": "Zrušit"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Časy jsou vypočteny pro souřadnice Praha (Česká republika)",
     "legendMoonphases": "Fáze Měsíce. Čas fáze.",
     "legendMooneclipses": "Zatmění Měsíce. A = úplné B = částečné C = polostínové. Čas zatmění.",
-    "legendExplanation": "U každé planety jsou uvedeny časy východu, kulminace a západu.\nVšechny časy jsou uvedeny v místním čase pro {{city}}.",
+    "legendExplanation": "U každé planety jsou uvedeny časy východu, kulminace a západu.\nTexty jsou v českém jazyce. Všechny časy jsou uvedeny v místním čase města {{city}}.",
     "notVisible": "Není vidět",
     "sun": "Slunce",
     "moon": "Měsíc",

@@ -8,6 +8,7 @@
       "title": "Odabir godine i jezika",
       "year": "Godina",
       "language": "Jezik",
+      "observer": "Promatrač",
       "btnOk": "U redu",
       "btnCancel": "Odustani"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Vremena su izračunata za koordinate Zagreb (Hrvatska)",
     "legendMoonphases": "Mjesečeve mijene. Vrijeme mijene.",
     "legendMooneclipses": "Pomrčine Mjeseca. A = potpuna B = djelomična C = polusjena. Vrijeme pomrčine.",
-    "legendExplanation": "Za svaki planet navedena su vremena izlaska, kulminacije i zalaska.\nSva vremena su navedena u lokalnom vremenu za {{city}}.",
+    "legendExplanation": "Za svaki planet navedena su vremena izlaska, kulminacije i zalaska.\nTekstovi su na hrvatskom jeziku. Sva vremena navedena su prema lokalnom vremenu grada {{city}}.",
     "notVisible": "Nije vidljivo",
     "sun": "Sunce",
     "moon": "Mjesec",

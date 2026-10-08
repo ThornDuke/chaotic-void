@@ -8,6 +8,7 @@
       "title": "Selecció d’any i idioma",
       "year": "Any",
       "language": "Llengua",
+      "observer": "Observador",
       "btnOk": "D'acord",
       "btnCancel": "Cancel·la"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Els horaris es calculen per a les coordenades de Andorra la Vella (Andorra)",
     "legendMoonphases": "Fases de la Lluna. Hora de la fase.",
     "legendMooneclipses": "Eclipsis de lluna. A = total B = parcial C = penombra. Hora de l’eclipsi.",
-    "legendExplanation": "Per a cada planeta s'indiquen les hores de sortida, culminació i posta.\nTotes les hores s'indiquen en l'hora local de {{city}}.",
+    "legendExplanation": "Per a cada planeta s'indiquen les hores de la sortida, de la culminació i de la posta.\nEls textos són en llengua catalana. Totes les hores s'indiquen en hora local de {{city}}.",
     "notVisible": "No visible",
     "sun": "Sol",
     "moon": "Lluna",

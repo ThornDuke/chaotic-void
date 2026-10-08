@@ -8,6 +8,7 @@
       "title": "Wybór roku i języka",
       "year": "Rok",
       "language": "Język",
+      "observer": "Obserwator",
       "btnOk": "Ok",
       "btnCancel": "Anuluj"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Godziny są obliczone dla współrzędnych Warszawa (Polska)",
     "legendMoonphases": "Fazy Księżyca. Czas fazy.",
     "legendMooneclipses": "Zaćmienia Księżyca. A = całkowite B = częściowe C = półcieniowe. Czas zaćmienia.",
-    "legendExplanation": "Dla każdej planety podano godziny wschodu, kulminacji i zachodu.\nWszystkie godziny są podane w czasie lokalnym dla {{city}}.",
+    "legendExplanation": "Dla każdej planety podano godziny wschodu, górowania i zachodu.\nTeksty są w języku polskim. Wszystkie godziny podano w czasie lokalnym miasta {{city}}.",
     "notVisible": "Niewidoczne",
     "sun": "Słońce",
     "moon": "Księżyc",

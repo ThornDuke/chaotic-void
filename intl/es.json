@@ -8,6 +8,7 @@
       "title": "Selección de año e idioma",
       "year": "Año",
       "language": "Idioma",
+      "observer": "Observador",
       "btnOk": "Aceptar",
       "btnCancel": "Cancelar"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Los horarios están calculados para las coordenadas de Madrid (España)",
     "legendMoonphases": "Fases de la Luna. Hora de la fase.",
     "legendMooneclipses": "Eclipses de luna. A = total B = parcial C = penumbra. Hora del eclipse.",
-    "legendExplanation": "Para cada planeta se indican las horas de salida, culminación y puesta.\nTodas las horas se indican en la hora local de {{city}}.",
+    "legendExplanation": "Para cada planeta se indican las horas de salida, de culminación y de puesta.\nLos textos están en lengua española. Todas las horas se indican en hora local de {{city}}.",
     "notVisible": "No visible",
     "sun": "Sol",
     "moon": "Luna",

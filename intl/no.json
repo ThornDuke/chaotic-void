@@ -8,6 +8,7 @@
       "title": "Valg av år og språk",
       "year": "År",
       "language": "Språk",
+      "observer": "Observatør",
       "btnOk": "Ok",
       "btnCancel": "Avbryt"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Tidene er beregnet for koordinatene til Oslo (Norge)",
     "legendMoonphases": "Månefaser. Tid for fasen.",
     "legendMooneclipses": "Måneformørkelser. A = total B = delvis C = halvskygge. Tid for formørkelsen.",
-    "legendExplanation": "For hver planet er tidene for oppgang, kulminasjon og nedgang angitt.\nAlle tider er oppgitt i lokal tid for {{city}}.",
+    "legendExplanation": "For hver planet er tidspunktene for oppgang, kulminasjon og nedgang angitt.\nTekstene er på norsk. Alle tidspunkter er angitt i lokal tid for {{city}}.",
     "notVisible": "Ikke synlig",
     "sun": "Sol",
     "moon": "Måne",

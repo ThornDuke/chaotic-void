@@ -8,6 +8,7 @@
       "title": "Év és nyelv kiválasztása",
       "year": "Év",
       "language": "Nyelv",
+      "observer": "Megfigyelő",
       "btnOk": "Ok",
       "btnCancel": "Mégse"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Az időpontok Budapest (Magyarország) koordinátáira vannak kiszámítva",
     "legendMoonphases": "Holdfázisok. Fázis ideje.",
     "legendMooneclipses": "Holdfogyatkozások. A = teljes B = részleges C = félárnyékos. Fogyatkozás ideje.",
-    "legendExplanation": "Minden bolygónál fel van tüntetve a kelés, a delelés és a nyugvás időpontja.\nMinden időpont {{city}} helyi idejében van megadva.",
+    "legendExplanation": "Minden bolygónál fel van tüntetve a keltének, a delelésnek és a nyugvásnak az ideje.\nA szövegek magyar nyelvűek. Minden időpont {{city}} helyi idejében van megadva.",
     "notVisible": "Nem látható",
     "sun": "Nap",
     "moon": "Hold",

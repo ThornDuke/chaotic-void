@@ -77,7 +77,7 @@
     "legendHours": "Times are calculated for the coordinates of London (United Kingdom)",
     "legendMoonphases": "Moon phases. Phase time.",
     "legendMooneclipses": "Moon eclipses. A = total B = partial C = penumbral. Eclipse time.",
-    "legendExplanation": "For each planet, the times of rise, culmination, and set are indicated.\nAll times are shown in the local time of {{city}}.",
+    "legendExplanation": "For each planet, the times of rising, culmination and setting are shown.\nThe texts are in English. All times are given in local time of {{city}}.",
     "notVisible": "Not visible",
     "sun": "Sun",
     "moon": "Moon",

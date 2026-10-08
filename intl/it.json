@@ -8,6 +8,7 @@
       "title": "Selezione di anno e lingua",
       "year": "Anno",
       "language": "Lingua",
+      "observer": "Osservatore",
       "btnOk": "Ok",
       "btnCancel": "Annulla"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Gli orari sono calcolati per le coordinate di Roma (Italia)",
     "legendMoonphases": "Fasi della Luna. Ora della fase.",
     "legendMooneclipses": "Eclissi di luna. A = totale B = parziale C = penombra. Ora dell’eclissi.",
-    "legendExplanation": "Per ogni pianeta sono indicati gli orari del sorgere, della culminazione e del tramonto.\nTutti gli orari sono indicati in ora locale di {{city}}.",
+    "legendExplanation": "Per ogni pianeta sono indicati gli orari del sorgere, della culminazione e del tramonto.\nI testi sono in lingua italiana. Tutti gli orari sono indicati in ora locale di {{city}}.",
     "notVisible": "Non visibile",
     "sun": "Sole",
     "moon": "Luna",

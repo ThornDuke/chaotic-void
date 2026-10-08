@@ -8,6 +8,7 @@
       "title": "Sélection de l’année et de la langue",
       "year": "Année",
       "language": "Langue",
+      "observer": "Observateur",
       "btnOk": "Ok",
       "btnCancel": "Annuler"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Les horaires sont calculés pour les coordonnées de Paris (France)",
     "legendMoonphases": "Phases de la lune. Heure de la phase.",
     "legendMooneclipses": "Éclipses de lune. A = totale B = partielle C = pénombre. Heure de l’éclipse.",
-    "legendExplanation": "Pour chaque planète, les heures de lever, de culmination et de coucher sont indiquées.\nToutes les heures sont indiquées à l'heure locale de {{city}}.",
+    "legendExplanation": "Pour chaque planète, les heures du lever, de la culmination et du coucher sont indiquées.\nLes textes sont en langue française. Toutes les heures sont indiquées en heure locale de {{city}}.",
     "notVisible": "Pas visible",
     "sun": "Soleil",
     "moon": "Lune",

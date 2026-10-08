@@ -8,6 +8,7 @@
       "title": "Val av år och språk",
       "year": "År",
       "language": "Språk",
+      "observer": "Observatör",
       "btnOk": "Ok",
       "btnCancel": "Avbryt"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Tiderna är beräknade för koordinaterna i Stockholm (Sverige)",
     "legendMoonphases": "Månfaser. Tid för fasen.",
     "legendMooneclipses": "Månförmörkelser. A = total B = partiell C = halvskugga. Tid för förmörkelsen.",
-    "legendExplanation": "För varje planet anges tider för uppgång, kulmination och nedgång.\nAlla tider anges i lokal tid för {{city}}.",
+    "legendExplanation": "För varje planet anges tiderna för uppgång, kulmination och nedgång.\nTexterna är på svenska. Alla tider anges i lokal tid för {{city}}.",
     "notVisible": "Inte synlig",
     "sun": "Sol",
     "moon": "Måne",

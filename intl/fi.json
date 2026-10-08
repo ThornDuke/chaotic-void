@@ -8,6 +8,7 @@
       "title": "Vuoden ja kielen valinta",
       "year": "Vuosi",
       "language": "Kieli",
+      "observer": "Havainnoitsija",
       "btnOk": "Ok",
       "btnCancel": "Peruuta"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Ajat on laskettu Helsinki (Suomi) koordinaateille",
     "legendMoonphases": "Kuun vaiheet. Vaiheen aika.",
     "legendMooneclipses": "Kuunpimennykset. A = täydellinen B = osittainen C = puolivarjo. Pimennyksen aika.",
-    "legendExplanation": "Jokaisen planeetan kohdalla ilmoitetaan nousu-, kulminaatio- ja laskuajat.\nKaikki ajat on ilmoitettu kohteen {{city}} paikallista aikaa.",
+    "legendExplanation": "Jokaisesta planeetasta ilmoitetaan nousun, kulminaation ja laskun ajat.\nTekstit ovat suomen kielellä. Kaikki ajat on ilmoitettu paikallisessa ajassa kaupungissa {{city}}.",
     "notVisible": "Ei näkyvissä",
     "sun": "Aurinko",
     "moon": "Kuu",

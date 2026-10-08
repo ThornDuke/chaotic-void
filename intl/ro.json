@@ -8,6 +8,7 @@
       "title": "Selecția anului și a limbii",
       "year": "An",
       "language": "Limbă",
+      "observer": "Observator",
       "btnOk": "Ok",
       "btnCancel": "Anulează"
     },
@@ -76,7 +77,7 @@
     "legendHours": "Orarele sunt calculate pentru coordonatele București (România)",
     "legendMoonphases": "Fazele Lunii. Ora fazei.",
     "legendMooneclipses": "Eclipse de lună. A = totală B = parțială C = penumbră. Ora eclipsei.",
-    "legendExplanation": "Pentru fiecare planetă sunt indicate orele de răsărit, culminație și apus.\nToate orele sunt indicate în ora locală din {{city}}.",
+    "legendExplanation": "Pentru fiecare planetă sunt indicate orele de răsărit, de culminație și de apus.\nTextele sunt în limba română. Toate orele sunt indicate în ora locală a orașului {{city}}.",
     "notVisible": "Nu este vizibil",
     "sun": "Soare",
     "moon": "Lună",
