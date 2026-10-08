@@ -17,6 +17,7 @@ https://gist.github.com/ThornDuke/64da76cd4a56b16492d5101691f6108f
 
 ### Added
 
+- 2026-10-08 12:09:13 A little fix in the structure of the first page.
 - 2026-10-08 10:08:09 Each language file has been updated with the new strings.
 - 2026-10-07 20:12:31 The elements used to compile the agenda include not only the year and the language of the texts but also the observer's city.
 

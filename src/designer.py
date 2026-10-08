@@ -755,7 +755,7 @@ def drawFirstPage(data, language, observer):
     scribus.setText(f"{year}", title_frame)
     scribus.setParagraphStyle("title_par_style", title_frame)
 
-    legend_frame = scribus.createText(17, 136.240, 121, 3.5)
+    legend_frame = scribus.createText(17, 134.490, 121, 3.5)
     scribus.setText(f"{t("planner.legend")}", legend_frame)
     scribus.setParagraphStyle("text_left_par_style", legend_frame)
 
