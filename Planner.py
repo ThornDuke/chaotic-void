@@ -34,6 +34,9 @@ not present in the script folder.
 
 The program was developed and tested on a Linux Mint 22 “Wilma” system.
 
+First scratch: 2026-02-20
+Discussion: <https://github.com/ThornDuke/chaotic-void/discussions>
+
 LICENSE:
 
 Copyright (C) 2026  Sergio Spina
@@ -54,14 +57,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 __program_name__ = "Planner"
-__version__ = "3.1.1"
-__author__ = "Sergio Spina"
-__email__ = "sergio.am.spina@gmail.com"
-__license__ = "GPLv3"
-__date__ = "2026-02-20"
+__version__ = "3.2.5"
+__author__ = "Thorn Duke"
 
 import sys
-import datetime
 
 try:
     import scribus  # pyright: ignore[reportMissingImports]
@@ -79,6 +78,7 @@ except ImportError:
     print(no_scribus_msg)
     sys.exit(1)
 
+import datetime
 import src.mainform as mainform
 import src.calendarist as calendarist
 import src.designer as designer
@@ -108,7 +108,7 @@ def main() -> None:
         # Data generation and layout creation
         calendar_data = calendarist.generate_full_calendar(year, language, observer)
         designer.create_planner_A5(calendar_data, language, observer)
-        scribus.setInfo("Sergio Spina", "A5 Planner", f"Edition {year} compiled for {observer} in {language} language")
+        scribus.setInfo(__author__, f"Edition {year} | Observer: {observer} | Language: {language}", __program_name__)
         process_end = datetime.datetime.now().replace(microsecond=0)
         duration = process_end - process_start
         scribus.messageBox(

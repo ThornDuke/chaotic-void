@@ -64,7 +64,7 @@ def get_A5_1w2p_line_data(side):
     # Additional vertical guide only for the right-hand page
     if side == "right":
         result.append(
-            {"ax": 77.5, "ay": 139.361, "bx": 77.5, "by": 139.361 + 60.639, "th": 0.333}
+            {"ax": 77.5, "ay": 139.361, "bx": 77.5, "by": 139.361 + 60.639, "th": 1}
         )
 
     return result

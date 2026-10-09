@@ -97,7 +97,7 @@ def createLineStyles():
     """
     Initialize custom line styles (thin and thick) within the Scribus document.
     """
-    scribus.createCustomLineStyle("thin", [{"Color": "Black", "Width": 0.33}])
+    scribus.createCustomLineStyle("thin", [{"Color": "Black", "Width": 0.25}])
     scribus.createCustomLineStyle("thick", [{"Color": "Black", "Width": 1}])
 
 
@@ -608,7 +608,7 @@ def draw_page(side, items):
     # Handle the 4th day specifically (left column of the last row)
     if side == "right":
         draw_weekday_frame(
-            77.425,
+            77.825,
             140.637,
             60,
             3.5,
